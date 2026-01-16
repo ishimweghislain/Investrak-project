@@ -95,3 +95,72 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'Error creating investor', error: error.message }, { status: 500 });
     }
 }
+
+export async function PUT(request: NextRequest) {
+    if (!(await isAdmin(request))) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+        const { username, company, email, password } = await request.json();
+
+        if (!id) {
+            return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
+        }
+
+        const updateData: any = {
+            username,
+            company,
+            email,
+        };
+
+        if (password) {
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id },
+            data: updateData
+        });
+
+        return NextResponse.json({
+            message: 'Investor updated successfully',
+            user: {
+                id: updatedUser.id,
+                username: updatedUser.username,
+                company: (updatedUser as any).company,
+                role: updatedUser.role,
+            }
+        });
+    } catch (error: any) {
+        console.error('Error updating investor:', error);
+        return NextResponse.json({ message: 'Error updating investor', error: error.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: NextRequest) {
+    if (!(await isAdmin(request))) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
+        }
+
+        await prisma.user.delete({
+            where: { id }
+        });
+
+        return NextResponse.json({ message: 'Investor deleted successfully' });
+    } catch (error: any) {
+        console.error('Error deleting investor:', error);
+        return NextResponse.json({ message: 'Error deleting investor', error: error.message }, { status: 500 });
+    }
+}
+

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TrendingUp, Shield, BarChart3, Users, ArrowRight, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { TrendingUp, Shield, BarChart3, Users, ArrowRight, Lock, User, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function Home() {
@@ -15,12 +15,11 @@ export default function Home() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Show loading toast
     const loadingToast = toast.loading('Authenticating...', {
       style: {
-        background: 'linear-gradient(135deg, #1e40af 0%, #475569 100%)',
+        background: '#0a0c10',
         color: '#fff',
-        border: '1px solid #3b82f6',
+        border: '1px solid rgba(255,255,255,0.1)',
       },
     });
 
@@ -35,30 +34,29 @@ export default function Home() {
 
       const data = await response.json();
 
-      // Dismiss loading toast after 1.5 seconds
       setTimeout(() => {
         toast.dismiss(loadingToast);
 
         if (response.ok) {
           localStorage.setItem('token', data.token);
-          toast.success('Login successful! Redirecting...', {
+          toast.success('Access Granted.', {
             duration: 1500,
             style: {
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              background: '#0a0c10',
               color: '#fff',
-              border: '1px solid #10b981',
+              border: '1px solid rgba(59,130,246,0.5)',
             },
           });
           setTimeout(() => {
             window.location.href = '/dashboard';
           }, 1500);
         } else {
-          toast.error(data.message || 'Login failed', {
+          toast.error(data.message || 'Authentication Failed', {
             duration: 3000,
             style: {
-              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-              color: '#fff',
-              border: '1px solid #ef4444',
+              background: '#0a0c10',
+              color: '#ef4444',
+              border: '1px solid rgba(239,68,68,0.2)',
             },
           });
         }
@@ -66,12 +64,12 @@ export default function Home() {
     } catch (err) {
       setTimeout(() => {
         toast.dismiss(loadingToast);
-        toast.error('Network error. Please try again.', {
+        toast.error('Network failure.', {
           duration: 3000,
           style: {
-            background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-            color: '#fff',
-            border: '1px solid #ef4444',
+            background: '#0a0c10',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
           },
         });
       }, 1500);
@@ -84,88 +82,82 @@ export default function Home() {
 
   if (showLogin) {
     return (
-      <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center p-4 overflow-hidden relative">
-        {/* Animated background elements */}
+      <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center p-4 overflow-x-hidden relative">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-slate-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
 
         <Toaster position="top-right" />
 
-        <div className="relative z-10 w-full max-w-[1100px] flex flex-col md:flex-row bg-[#161b22]/40 backdrop-blur-2xl rounded-[32px] overflow-hidden border border-white/5 shadow-2xl">
+        <div className="relative z-10 w-full max-w-[900px] flex flex-col md:flex-row bg-[#161b22]/60 backdrop-blur-3xl rounded-[32px] overflow-hidden border border-white/10 shadow-3xl">
           {/* Left Side - Visual/Info */}
-          <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 to-slate-800 p-12 flex-col justify-between relative overflow-hidden">
+          <div className="hidden lg:flex md:w-5/12 bg-gradient-to-br from-blue-600 to-slate-900 p-10 flex-col justify-between relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
             <div className="relative z-20">
-              <div className="flex items-center space-x-3 mb-10">
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20">
-                  <TrendingUp className="w-7 h-7 text-white" />
+              <div className="flex items-center space-x-2 mb-8">
+                <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-3xl font-bold text-white tracking-tight">Investrak</span>
+                <span className="text-xl font-bold text-white tracking-tighter">Investrak</span>
               </div>
-              <h2 className="text-5xl font-bold text-white leading-tight mb-6">
-                Institutional Grade <br />
-                <span className="text-blue-200">Asset Tracking</span>
+              <h2 className="text-3xl font-bold text-white leading-tight mb-4 tracking-tight">
+                Secure <br />
+                <span className="text-blue-200">Asset Control</span>
               </h2>
-              <p className="text-blue-100/80 text-lg max-w-md leading-relaxed">
-                Experience the next generation of investment management. Secure, transparent, and built for performance.
+              <p className="text-blue-100/70 text-sm max-w-sm leading-relaxed font-light">
+                Encrypted terminal for enterprise-level portfolio management.
               </p>
             </div>
 
-            <div className="relative z-20 grid grid-cols-2 gap-6 mt-12">
-              <div className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
-                <Shield className="w-6 h-6 text-blue-200 mb-2" />
-                <h4 className="text-white font-semibold">Secure</h4>
-                <p className="text-blue-100/60 text-xs">AES-256 Encryption</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
-                <BarChart3 className="w-6 h-6 text-blue-200 mb-2" />
-                <h4 className="text-white font-semibold">Real-time</h4>
-                <p className="text-blue-100/60 text-xs">Live Market Sync</p>
+            <div className="relative z-20 grid grid-cols-1 gap-3 mt-8 text-sm">
+              <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                <Shield className="w-5 h-5 text-blue-300 mb-2" />
+                <h4 className="text-white font-bold mb-0.5 text-xs">Vault Security</h4>
+                <p className="text-blue-100/50 text-[10px] font-medium uppercase tracking-widest">Active</p>
               </div>
             </div>
           </div>
 
           {/* Right Side - Form */}
-          <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
-            <div className="mb-10">
-              <h1 className="text-4xl font-bold text-white mb-3">Welcome Back</h1>
-              <p className="text-slate-400">Please enter your credentials to continue</p>
+          <div className="w-full lg:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-[#161b22]/40">
+            <div className="mb-8 text-center lg:text-left">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Access Portal</h1>
+              <p className="text-slate-400 text-sm font-light">Verification required for entry</p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 ml-1">Username</label>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Identity</label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-[#0d1117] border border-slate-800 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                    className="w-full pl-12 pr-4 py-3 bg-[#0d1117] border border-white/5 rounded-xl text-white text-sm placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium"
                     placeholder="Username"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Secret Key</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-4 bg-[#0d1117] border border-slate-800 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                    className="w-full pl-12 pr-12 py-3 bg-[#0d1117] border border-white/5 rounded-xl text-white text-sm placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium"
                     placeholder="••••••••"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-400 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-blue-400 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -173,28 +165,26 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-3 disabled:opacity-50 group"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 group text-sm mt-4 active:scale-[0.98]"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    <span>Sign In to Dashboard</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <span>Authenticate</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
             </form>
 
             <div className="mt-10 flex flex-col items-center gap-4">
-              <p className="text-slate-500 text-sm">
-                Secure access for authorized personnel and investors only.
-              </p>
               <button
                 onClick={() => setShowLogin(false)}
-                className="text-slate-400 hover:text-white text-sm transition-colors flex items-center gap-2"
+                className="text-slate-500 hover:text-white text-xs transition-colors flex items-center gap-2 font-medium"
               >
-                ← Return to Home
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Return to Surface
               </button>
             </div>
           </div>
@@ -204,85 +194,82 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0c10] text-white selection:bg-blue-500/30">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-slate-600/5 rounded-full blur-[120px]"></div>
+    <div className="min-h-screen bg-[#0a0c10] text-white selection:bg-blue-600/30 overflow-x-hidden">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/10 rounded-full blur-[120px]"></div>
       </div>
 
-      <nav className="relative z-50 flex justify-between items-center px-6 py-8 max-w-7xl mx-auto">
-        <div className="flex items-center space-x-3 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-            <TrendingUp className="w-6 h-6 text-white" />
+      <nav className="relative z-50 px-6 py-6 max-w-6xl mx-auto flex justify-between items-center">
+        <div className="flex items-center space-x-2 group">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30 group-hover:scale-110 transition-transform duration-500">
+            <TrendingUp className="w-5 h-5 text-white" />
           </div>
-          <span className="text-2xl font-bold tracking-tight">Investrak</span>
+          <span className="text-xl font-bold tracking-tighter">Investrak</span>
         </div>
-        <div className="flex items-center gap-8">
-          <button className="hidden md:block text-slate-400 hover:text-white transition-colors">Solutions</button>
-          <button className="hidden md:block text-slate-400 hover:text-white transition-colors">Security</button>
+        <div className="flex items-center gap-4 md:gap-6">
+          <button className="hidden sm:block text-slate-500 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest">Solutions</button>
           <button
             onClick={() => setShowLogin(true)}
-            className="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all font-medium backdrop-blur-sm"
+            className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all font-bold text-xs backdrop-blur-md active:scale-95"
           >
-            Sign In
+            Terminal Access
           </button>
         </div>
       </nav>
 
-      <main className="relative z-10 pt-20 pb-40">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-sm font-medium mb-8 animate-fade-in">
-            <Shield className="w-4 h-4" />
-            Institutional Portfolio Management
+      <main className="relative z-10 pt-12 md:pt-20 pb-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 animate-fade-in shadow-lg shadow-blue-600/5">
+            <Shield className="w-3.5 h-3.5" />
+            Institutional Portfolio Infrastructure
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter leading-[1.1]">
-            Empower Your <br />
-            <span className="bg-gradient-to-r from-blue-400 via-blue-200 to-slate-400 bg-clip-text text-transparent">
-              Financial Strategy
+          <h1 className="text-4xl md:text-6xl font-bold mb-8 tracking-tighter leading-[1.1]">
+            Automate Your <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-200 to-slate-400">
+              Wealth Strategy
             </span>
           </h1>
 
-          <p className="text-xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
-            The premier platform for high-net-worth investors and institutional managers.
-            Real-time analytics, automated reporting, and uncompromising security.
+          <p className="text-base md:text-lg text-slate-500 max-w-xl mx-auto mb-12 leading-relaxed font-light">
+            Engineered for high-performing institutional managers. Real-time capital intelligence with surgical precision.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-5 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => setShowLogin(true)}
-              className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-lg transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-3 group"
+              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-base transition-all shadow-2xl shadow-blue-600/30 flex items-center justify-center gap-2 group active:scale-95"
             >
-              Get Started Now
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              Enter Dashboard
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-bold text-lg transition-all backdrop-blur-sm">
-              Watch Demo
+            <button className="px-8 py-4 bg-[#161b22]/40 hover:bg-[#161b22]/60 border border-white/5 rounded-2xl font-bold text-base transition-all backdrop-blur-xl group">
+              Interface Demo
             </button>
           </div>
         </div>
 
-        {/* Platform Preview */}
-        <div className="max-w-6xl mx-auto px-6 mt-32 relative">
-          <div className="absolute inset-0 bg-blue-600/20 blur-[150px] -z-10 rounded-full transform scale-75"></div>
-          <div className="bg-[#161b22] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl relative">
-            <div className="h-12 bg-[#0d1117] border-b border-white/5 flex items-center px-6 gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500/20"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500/20"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500/20"></div>
+        {/* System Preview */}
+        <div className="max-w-5xl mx-auto mt-24 relative">
+          <div className="bg-[#161b22]/40 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden shadow-3xl">
+            <div className="h-8 bg-[#0d1117]/80 border-b border-white/5 flex items-center px-6 gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-red-500/30"></div>
+              <div className="w-2 h-2 rounded-full bg-yellow-500/30"></div>
+              <div className="w-2 h-2 rounded-full bg-green-500/30"></div>
             </div>
-            <div className="p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               {[
-                { icon: BarChart3, title: 'Live Analytics', desc: 'Track your portfolio performance with sub-second latency.' },
-                { icon: Shield, title: 'Military Grade', desc: 'End-to-end encryption for all your financial sensitive data.' },
-                { icon: Users, title: 'Collaborative', desc: 'Manage multiple investor accounts with granular permissions.' }
+                { icon: BarChart3, title: 'Quant Intel', desc: 'Predictive market modeling with precision analytics.' },
+                { icon: Shield, title: 'Cyber Vault', desc: 'Sovereign security architecture protecting your assets.' },
+                { icon: Users, title: 'Multi-Node', desc: 'Manage complex investor structures with granular control.' }
               ].map((feature, i) => (
-                <div key={i} className="space-y-4">
-                  <div className="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center">
+                <div key={i} className="space-y-4 group">
+                  <div className="w-12 h-12 bg-blue-600/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-blue-500/10">
                     <feature.icon className="w-6 h-6 text-blue-400" />
                   </div>
-                  <h3 className="text-xl font-bold">{feature.title}</h3>
-                  <p className="text-slate-500 leading-relaxed font-light">{feature.desc}</p>
+                  <h3 className="text-xl font-bold tracking-tight text-white">{feature.title}</h3>
+                  <p className="text-slate-500 leading-relaxed font-light text-sm">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -290,17 +277,18 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="border-t border-white/5 py-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center space-x-2 text-slate-500">
+      <footer className="border-t border-white/5 py-10 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex items-center space-x-2 text-slate-600">
             <TrendingUp className="w-5 h-5" />
-            <span className="font-semibold text-sm">Investrak &copy; 2024</span>
+            <span className="font-bold tracking-tighter text-lg">Investrak</span>
           </div>
-          <div className="flex gap-8 text-sm text-slate-500">
-            <button className="hover:text-white transition-colors">Privacy Policy</button>
-            <button className="hover:text-white transition-colors">Terms of Service</button>
-            <button className="hover:text-white transition-colors">Security FAQ</button>
+          <div className="flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
+            <button className="hover:text-blue-400 transition-colors">Privacy Vault</button>
+            <button className="hover:text-blue-400 transition-colors">Legal Framework</button>
+            <button className="hover:text-blue-400 transition-colors">Security Node</button>
           </div>
+          <p className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">© 2026 Sovereign Systems</p>
         </div>
       </footer>
     </div>
