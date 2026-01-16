@@ -10,20 +10,21 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma db reset --force && npm run db:seed"
+    "db:reset": "prisma db reset --force && npm run db:seed",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^5.6.0",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
     "next": "14.2.5",
-    "prisma": "^7.2.0",
+    "prisma": "^5.6.0",
     "react": "^18",
     "react-dom": "^18",
     "react-hot-toast": "^2.6.0",
