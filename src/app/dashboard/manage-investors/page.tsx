@@ -154,7 +154,7 @@ export default function ManageInvestors() {
                             </div>
                             <h3 className="text-xl font-semibold text-slate-400">No investors found</h3>
                             <p className="text-slate-500 max-w-sm mx-auto mt-2">
-                                Click the "Add Investor" button to create your first investor account.
+                                Click the &quot;Add Investor&quot; button to create your first investor account.
                             </p>
                         </div>
                     )}

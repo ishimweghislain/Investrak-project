@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const investors = await prisma.user.findMany({
-            where: { role: 'INVESTOR' },
+            where: { role: 'INVESTOR' as any },
             select: {
                 id: true,
                 username: true,
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
                 firstName: true,
                 lastName: true,
                 createdAt: true,
-            }
+            } as any
         });
         return NextResponse.json(investors);
     } catch (error: any) {
@@ -77,8 +77,8 @@ export async function POST(request: NextRequest) {
                 company,
                 password: hashedPassword,
                 email: email || `${username}@investrak-investor.com`,
-                role: 'INVESTOR',
-            }
+                role: 'INVESTOR' as any,
+            } as any
         });
 
         return NextResponse.json({
@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
             user: {
                 id: newUser.id,
                 username: newUser.username,
-                company: newUser.company,
-                role: newUser.role,
+                company: (newUser as any).company,
+                role: (newUser as any).role,
             }
         });
     } catch (error: any) {
