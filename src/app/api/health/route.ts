@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
   try {
     console.log('Health check - Environment:', {
       hasDbUrl: !!process.env.DATABASE_URL,
@@ -17,7 +23,7 @@ export async function GET() {
       database: 'connected',
       environment: process.env.NODE_ENV || 'development',
       hasDbUrl: !!process.env.DATABASE_URL
-    });
+    }, { headers });
   } catch (error: any) {
     console.error('Health check error:', error);
     return NextResponse.json(
@@ -26,7 +32,7 @@ export async function GET() {
         error: error.message,
         hasDbUrl: !!process.env.DATABASE_URL
       },
-      { status: 500 }
+      { status: 500, headers }
     );
   }
 }
