@@ -7,6 +7,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Login attempt - Environment check:', {
+      hasDbUrl: !!process.env.DATABASE_URL,
+      nodeEnv: process.env.NODE_ENV,
+      dbUrlLength: process.env.DATABASE_URL?.length
+    });
+
     const { username, password } = await request.json();
 
     // Validate input
@@ -23,6 +29,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
+      console.log('User not found:', username);
       return NextResponse.json(
         { message: 'Invalid credentials' },
         { status: 401 }
@@ -33,6 +40,7 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, user.password);
     
     if (!isValidPassword) {
+      console.log('Invalid password for user:', username);
       return NextResponse.json(
         { message: 'Invalid credentials' },
         { status: 401 }
@@ -51,6 +59,7 @@ export async function POST(request: NextRequest) {
       { expiresIn: '24h' }
     );
 
+    console.log('Login successful for user:', username);
     return NextResponse.json({
       message: 'Login successful',
       token,
@@ -64,10 +73,15 @@ export async function POST(request: NextRequest) {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'Internal server error', error: error.message },
       { status: 500 }
     );
   }
