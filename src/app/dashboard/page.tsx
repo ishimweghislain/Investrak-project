@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LogOut, User, X } from 'lucide-react';
+import { LogOut, User, X, Shield, Building2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -71,7 +71,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <Toaster position="top-right" />
-      
+
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -83,7 +83,7 @@ export default function Dashboard() {
             >
               <X className="w-5 h-5" />
             </button>
-            
+
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <LogOut className="w-8 h-8 text-red-400" />
@@ -93,7 +93,7 @@ export default function Dashboard() {
                 Are you sure you want to logout? You will need to login again to access your dashboard.
               </p>
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={cancelLogout}
@@ -111,7 +111,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      
+
       <nav className="relative z-10 flex justify-between items-center p-6 lg:p-8 bg-slate-800/20 backdrop-blur-sm">
         <div className="flex items-center space-x-2">
           <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-slate-600 rounded-lg flex items-center justify-center">
@@ -119,7 +119,7 @@ export default function Dashboard() {
           </div>
           <span className="text-2xl font-bold text-white">Investrak</span>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2 text-white">
             <User className="w-5 h-5" />
@@ -135,20 +135,61 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <main className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 py-20">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-white mb-6">
-            Welcome to Your Dashboard
+      <main className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 py-20">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold text-white mb-6 tracking-tight">
+            Welcome, {user?.role === 'ADMIN' ? 'Administrator' : 'Investor'}
           </h1>
-          <p className="text-xl text-slate-300 mb-8">
-            Hello {user?.firstName || user?.username}! You have successfully logged into Investrak.
+          <p className="text-2xl text-slate-300 mb-8 font-light">
+            Hello {user?.firstName || user?.username}! {user?.role === 'INVESTOR' && `Proudly representing ${user?.company}`}
           </p>
-          <div className="bg-slate-800/50 backdrop-blur-lg rounded-xl p-8 border border-slate-700">
-            <h2 className="text-2xl font-semibold text-white mb-4">Authentication Successful</h2>
-            <p className="text-slate-300">
-              This is a simple dashboard to demonstrate that the authentication system is working correctly.
-              More features will be added soon.
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-slate-800/40 backdrop-blur-xl rounded-3xl p-10 border border-slate-700/50 shadow-2xl">
+            <h2 className="text-3xl font-semibold text-white mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              Overview
+            </h2>
+            <p className="text-slate-300 leading-relaxed text-lg">
+              {user?.role === 'ADMIN'
+                ? "As an administrator, you have full control over the platform. You can manage investors, monitor transactions, and oversee system stability."
+                : `Welcome ${user?.username} from ${user?.company || 'your organization'}. You can now access your personalized investment portfolio and track your performance in real-time.`
+              }
             </p>
+          </div>
+
+          <div className="bg-slate-800/40 backdrop-blur-xl rounded-3xl p-10 border border-slate-700/50 shadow-2xl flex flex-col justify-between">
+            <div>
+              <h2 className="text-3xl font-semibold text-white mb-6">Quick Actions</h2>
+              <div className="space-y-4">
+                {user?.role === 'ADMIN' ? (
+                  <>
+                    <button
+                      onClick={() => window.location.href = '/dashboard/manage-investors'}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3"
+                    >
+                      <User className="w-5 h-5" />
+                      Manage Investors
+                    </button>
+                    <button className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3">
+                      View System Reports
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3">
+                      View My Portfolio
+                    </button>
+                    <button className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3">
+                      Contact Advisor
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </main>

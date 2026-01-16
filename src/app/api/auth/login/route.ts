@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
         username: user.username,
         email: user.email,
         role: user.role,
+        company: user.company,
       },
       JWT_SECRET,
       { expiresIn: '24h' }
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          company: user.company,
           role: user.role,
         },
       },
