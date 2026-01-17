@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft } from 'lucide-react';
+import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft, TrendingUp, DollarSign, Calendar, Save, Bell, Send } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function ManageInvestors() {
@@ -10,14 +10,33 @@ export default function ManageInvestors() {
     const [isAdding, setIsAdding] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isManagingInvestments, setIsManagingInvestments] = useState(false);
     const [selectedInvestor, setSelectedInvestor] = useState<any>(null);
 
+    // Investor Form Data
     const [formData, setFormData] = useState({
         username: '',
         company: '',
         password: '',
         email: ''
     });
+
+    // Investment Form Data & State
+    const [userInvestments, setUserInvestments] = useState<any[]>([]);
+    const [loadingInvestments, setLoadingInvestments] = useState(false);
+    const [editingInvestment, setEditingInvestment] = useState<any>(null); // If not null, we are updating
+    const [investmentForm, setInvestmentForm] = useState({
+        title: '',
+        amount: '',
+        roi: '',
+        maturityDate: '',
+        startDate: new Date().toISOString().split('T')[0],
+        status: 'PENDING'
+    });
+
+    // Notification Form
+    const [isSendingNotification, setIsSendingNotification] = useState(false);
+    const [notificationMessage, setNotificationMessage] = useState('');
 
     const [submitting, setSubmitting] = useState(false);
 
@@ -42,11 +61,10 @@ export default function ManageInvestors() {
                 const data = await response.json();
                 setInvestors(data);
             } else {
-                toast.error('Failed to fetch investors');
-                if (response.status === 401) window.location.href = '/dashboard';
+                if (response.status !== 403) toast.error('Failed to load investors');
             }
         } catch (error) {
-            toast.error('Network error');
+            console.error('Failed to fetch investors:', error);
         } finally {
             setLoading(false);
         }
@@ -144,6 +162,131 @@ export default function ManageInvestors() {
         }
     };
 
+    // Investments Logic
+    const openInvestmentsModal = async (investor: any) => {
+        setSelectedInvestor(investor);
+        setIsManagingInvestments(true);
+        setLoadingInvestments(true);
+        setEditingInvestment(null); // Reset edit mode
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/investments?userId=${investor.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUserInvestments(data);
+            }
+        } catch (e) {
+            toast.error('Failed to load investments');
+        } finally {
+            setLoadingInvestments(false);
+        }
+    };
+
+    const handleSaveInvestment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+
+        try {
+            let res;
+            if (editingInvestment) {
+                // Update
+                res = await fetch(`/api/investments?id=${editingInvestment.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(investmentForm)
+                });
+            } else {
+                // Create
+                res = await fetch('/api/investments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ userId: selectedInvestor.id, ...investmentForm })
+                });
+            }
+
+            if (res.ok) {
+                const savedInv = await res.json();
+                if (editingInvestment) {
+                    setUserInvestments(userInvestments.map(i => i.id === savedInv.id ? savedInv : i));
+                    toast.success('Investment updated');
+                } else {
+                    setUserInvestments([savedInv, ...userInvestments]);
+                    toast.success('Investment allocated');
+                }
+                resetInvestmentForm();
+            } else {
+                toast.error('Failed to save');
+            }
+        } catch (e) {
+            toast.error('Network Error');
+        }
+    };
+
+    const handleEditInvestment = (inv: any) => {
+        setEditingInvestment(inv);
+        setInvestmentForm({
+            title: inv.title,
+            amount: inv.amount.toString(),
+            roi: inv.roi ? inv.roi.toString() : '',
+            status: inv.status,
+            startDate: inv.startDate ? new Date(inv.startDate).toISOString().split('T')[0] : '',
+            maturityDate: inv.maturityDate ? new Date(inv.maturityDate).toISOString().split('T')[0] : ''
+        });
+    };
+
+    const handleDeleteInvestment = async (invId: string) => {
+        if (!confirm('Delete this investment?')) return;
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`/api/investments?id=${invId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setUserInvestments(userInvestments.filter(i => i.id !== invId));
+                toast.success('Investment deleted');
+                if (editingInvestment?.id === invId) resetInvestmentForm();
+            }
+        } catch (e) { toast.error('Error deleting'); }
+    };
+
+    const resetInvestmentForm = () => {
+        setEditingInvestment(null);
+        setInvestmentForm({
+            title: '',
+            amount: '',
+            roi: '',
+            maturityDate: '',
+            startDate: new Date().toISOString().split('T')[0],
+            status: 'PENDING'
+        });
+    };
+
+    // Notification Logic
+    const handleSendNotification = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ userId: selectedInvestor.id, message: notificationMessage })
+            });
+            if (res.ok) {
+                toast.success('Notification sent');
+                setNotificationMessage('');
+                setIsSendingNotification(false);
+            } else {
+                toast.error('Failed to send');
+            }
+        } catch (e) {
+            toast.error('Error sending');
+        }
+    };
+
     const resetForm = () => {
         setFormData({ username: '', company: '', password: '', email: '' });
         setSelectedInvestor(null);
@@ -153,7 +296,7 @@ export default function ManageInvestors() {
         setSelectedInvestor(investor);
         setFormData({
             username: investor.username,
-            company: investor.company,
+            company: investor.company || '',
             email: investor.email || '',
             password: ''
         });
@@ -174,12 +317,12 @@ export default function ManageInvestors() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0c10] text-slate-100 p-4 md:p-8 relative overflow-hidden">
+        <div className="min-h-screen bg-[#0a0c10] text-slate-100 p-4 md:p-8 relative overflow-hidden pb-32">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
 
             <Toaster position="top-right" />
 
-            <div className="max-w-6xl mx-auto relative z-10">
+            <div className="max-w-7xl mx-auto relative z-10">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                     <div>
                         <div className="flex items-center gap-1.5 text-blue-400 mb-2 group cursor-pointer" onClick={() => window.location.href = '/dashboard'}>
@@ -202,7 +345,7 @@ export default function ManageInvestors() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {investors.map((investor) => (
-                        <div key={investor.id} className="bg-[#161b22]/40 border border-white/5 p-5 rounded-[24px] backdrop-blur-xl hover:bg-[#1c2128]/60 transition-all group relative overflow-hidden">
+                        <div key={investor.id} className="bg-[#161b22]/40 border border-white/5 p-5 rounded-[24px] backdrop-blur-xl hover:bg-[#1c2128]/60 transition-all group relative overflow-hidden flex flex-col h-full">
                             <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
                                 <button
                                     onClick={() => openEditModal(investor)}
@@ -229,125 +372,212 @@ export default function ManageInvestors() {
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-3 flex-grow">
                                 <div className="p-3 bg-white/5 rounded-xl border border-white/5">
                                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">Affiliation</p>
-                                    <p className="text-white font-medium truncate text-sm">{investor.company}</p>
+                                    <p className="text-white font-medium truncate text-sm">{investor.company || 'N/A'}</p>
                                 </div>
+                            </div>
 
-                                <div className="flex justify-between items-center text-[10px] text-slate-500 mt-2">
-                                    <span>Created</span>
-                                    <span>{new Date(investor.createdAt).toLocaleDateString()}</span>
-                                </div>
+                            <div className="grid grid-cols-2 gap-2 mt-4">
+                                <button
+                                    onClick={() => openInvestmentsModal(investor)}
+                                    className="col-span-2 w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all border border-white/5 flex items-center justify-center gap-2 text-xs"
+                                >
+                                    <TrendingUp className="w-3.5 h-3.5" />
+                                    Manage Assets
+                                </button>
                             </div>
                         </div>
                     ))}
-
-                    {investors.length === 0 && !loading && (
-                        <div className="col-span-full py-20 text-center bg-[#161b22]/20 border border-dashed border-white/10 rounded-[32px]">
-                            <div className="w-16 h-16 bg-blue-600/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <User className="w-8 h-8 text-slate-700" />
-                            </div>
-                            <h3 className="text-xl font-bold text-white mb-1">No Profiles</h3>
-                            <p className="text-slate-500 text-sm max-w-sm mx-auto">
-                                No investor accounts provisioned yet.
-                            </p>
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* Modal Components */}
+            {/* Manage Investments Modal */}
+            {isManagingInvestments && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-[#0a0c10]/90 backdrop-blur-md" onClick={() => setIsManagingInvestments(false)}></div>
+                    <div className="relative bg-[#161b22] border border-white/10 w-full max-w-5xl max-h-[90vh] rounded-[32px] p-8 overflow-hidden flex flex-col">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">Portfolio Management</h2>
+                                <p className="text-slate-400 text-sm">Managing assets for <span className="text-blue-400">{selectedInvestor?.username}</span></p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setIsSendingNotification(!isSendingNotification)} className={`p-2 rounded-full transition-colors ${isSendingNotification ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}>
+                                    <Bell className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => setIsManagingInvestments(false)} className="bg-white/5 p-2 rounded-full hover:bg-white/10 transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Notification Panel */}
+                        {isSendingNotification && (
+                            <div className="mb-6 bg-blue-900/10 border border-blue-500/20 p-4 rounded-xl animate-in slide-in-from-top-2">
+                                <h3 className="text-sm font-bold text-blue-400 mb-2">Send Secure Alert</h3>
+                                <form onSubmit={handleSendNotification} className="flex gap-2">
+                                    <input autoFocus type="text" className="flex-1 bg-[#0d1117] border border-white/10 rounded-lg px-3 text-sm focus:border-blue-500/50 outline-none"
+                                        placeholder="Message content..." value={notificationMessage} onChange={e => setNotificationMessage(e.target.value)} required />
+                                    <button className="bg-blue-600 hover:bg-blue-500 px-4 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
+                                        <Send className="w-3 h-3" /> Send
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-hidden h-full">
+                            {/* Left: Add/Edit */}
+                            <div className="lg:col-span-1 bg-[#0d1117] p-6 rounded-2xl border border-white/5 overflow-y-auto">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-bold text-white flex items-center gap-2">
+                                        {editingInvestment ? <Edit2 className="w-4 h-4 text-orange-400" /> : <Plus className="w-4 h-4 text-blue-400" />}
+                                        {editingInvestment ? 'Update Asset' : 'Allocate Asset'}
+                                    </h3>
+                                    {editingInvestment && (
+                                        <button onClick={resetInvestmentForm} className="text-[10px] text-slate-500 hover:text-white underline">Cancel Edit</button>
+                                    )}
+                                </div>
+                                <form onSubmit={handleSaveInvestment} className="space-y-3">
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asset Name</label>
+                                        <input type="text" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                            value={investmentForm.title} onChange={e => setInvestmentForm({ ...investmentForm, title: e.target.value })} required placeholder="e.g. Tech Growth Fund" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Principal ($)</label>
+                                        <input type="number" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                            value={investmentForm.amount} onChange={e => setInvestmentForm({ ...investmentForm, amount: e.target.value })} required placeholder="0.00" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Target ROI (%)</label>
+                                        <input type="number" step="0.1" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                            value={investmentForm.roi} onChange={e => setInvestmentForm({ ...investmentForm, roi: e.target.value })} placeholder="0.0" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Start Date</label>
+                                            <input type="date" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-xs text-white focus:border-blue-500/50 outline-none"
+                                                value={investmentForm.startDate} onChange={e => setInvestmentForm({ ...investmentForm, startDate: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Maturity</label>
+                                            <input type="date" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-xs text-white focus:border-blue-500/50 outline-none"
+                                                value={investmentForm.maturityDate} onChange={e => setInvestmentForm({ ...investmentForm, maturityDate: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</label>
+                                        <select className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                            value={investmentForm.status} onChange={e => setInvestmentForm({ ...investmentForm, status: e.target.value })}>
+                                            <option value="PENDING">Pending</option>
+                                            <option value="ACTIVE">Active</option>
+                                            <option value="MATURED">Matured</option>
+                                            <option value="CLOSED">Closed</option>
+                                        </select>
+                                    </div>
+                                    <button className={`w-full font-bold py-3 rounded-lg text-sm transition-colors mt-2 ${editingInvestment ? 'bg-orange-600 hover:bg-orange-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}>
+                                        {editingInvestment ? 'Update Asset' : 'Allocate'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Right: List */}
+                            <div className="lg:col-span-2 overflow-y-auto pr-2">
+                                <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                                    <Building2 className="w-4 h-4 text-slate-400" /> Current Holdings
+                                </h3>
+                                {loadingInvestments ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" /></div> : (
+                                    <div className="space-y-3">
+                                        {userInvestments.map(inv => (
+                                            <div key={inv.id} className={`bg-[#0d1117] p-4 rounded-xl border flex justify-between items-center group transition-all ${editingInvestment?.id === inv.id ? 'border-orange-500/50 bg-orange-500/5' : 'border-white/5 hover:border-blue-500/20'}`}>
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <h4 className="font-bold text-white">{inv.title}</h4>
+                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inv.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'
+                                                            }`}>{inv.status}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-xs text-slate-400">
+                                                        <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {inv.amount.toLocaleString()}</span>
+                                                        <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" /> ROI: {inv.roi}%</span>
+                                                        {inv.maturityDate && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(inv.maturityDate).toLocaleDateString()}</span>}
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleEditInvestment(inv)} className="bg-white/5 p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteInvestment(inv.id)} className="bg-red-500/10 p-2 rounded-lg hover:bg-red-500/20 text-red-400 transition-colors">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {userInvestments.length === 0 && (
+                                            <div className="text-center py-10 text-slate-500 text-sm border border-dashed border-white/10 rounded-xl">
+                                                No active investments.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Provision/Edit Modal */}
             {(isAdding || isEditing) && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-[#0a0c10]/80 backdrop-blur-md" onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}></div>
                     <div className="relative bg-[#161b22] border border-white/10 w-full max-w-md rounded-[32px] p-8 md:p-10 shadow-2xl overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
-                        <button
-                            onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
-                            className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"
-                        >
+                        <button onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
                             <X className="w-6 h-6" />
                         </button>
-
-                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                            {isAdding ? 'Provision Investor' : 'Update Profile'}
-                        </h2>
-                        <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-                            {isAdding ? 'Configure new institutional access.' : 'Modify account security settings.'}
-                        </p>
-
-                        <form onSubmit={isAdding ? handleCreateInvestor : handleUpdateInvestor} className="space-y-4">
+                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{isAdding ? 'Provision Investor' : 'Update Profile'}</h2>
+                        <form onSubmit={isAdding ? handleCreateInvestor : handleUpdateInvestor} className="space-y-4 mt-6">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username (Primary ID)</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm placeholder-slate-700 font-medium"
-                                    placeholder="e.g. investor_alphonse"
-                                />
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                                <input type="text" required value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="Username" />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Venture Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.company}
-                                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm placeholder-slate-700 font-medium"
-                                    placeholder="e.g. Horizon Equity Partners"
-                                />
+                                <input type="text" required value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="Company" />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Secret Key {isEditing && '(Optional)'}</label>
-                                <input
-                                    type="password"
-                                    required={isAdding}
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm placeholder-slate-700 font-medium"
-                                    placeholder="••••••••"
-                                />
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                                <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="Email (Optional)" />
                             </div>
-                            <button
-                                disabled={submitting}
-                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-xl shadow-blue-600/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mt-4 text-sm"
-                            >
-                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAdding ? 'Confirm Provisioning' : 'Apply Changes')}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Secret Key</label>
+                                <input type="password" required={isAdding} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="••••••••" />
+                            </div>
+                            <button disabled={submitting} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-xl shadow-blue-600/20 transition-all flex justify-center gap-2 mt-4 text-sm">
+                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAdding ? 'Confrm Provisioning' : 'Apply Changes')}
                             </button>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
+            {/* Delete Modal */}
             {isDeleting && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-[#0a0c10]/90 backdrop-blur-sm" onClick={() => setIsDeleting(false)}></div>
                     <div className="relative bg-[#161b22] border border-red-500/20 w-full max-w-sm rounded-[32px] p-8 shadow-2xl text-center">
                         <div className="w-16 h-16 bg-red-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Trash2 className="w-8 h-8 text-red-500" />
                         </div>
                         <h2 className="text-2xl font-bold text-white mb-2">Revoke Access?</h2>
-                        <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-                            Permanently delete <span className="text-white font-bold">{selectedInvestor?.username}</span>?
-                        </p>
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => setIsDeleting(false)}
-                                className="bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all text-sm"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDeleteInvestor}
-                                disabled={submitting}
-                                className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all shadow-xl shadow-red-600/20 flex items-center justify-center text-sm"
-                            >
-                                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
-                            </button>
+                        <div className="grid grid-cols-2 gap-3 mt-8">
+                            <button onClick={() => setIsDeleting(false)} className="bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all text-sm">Cancel</button>
+                            <button onClick={handleDeleteInvestor} disabled={submitting} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all text-sm">Confirm</button>
                         </div>
                     </div>
                 </div>

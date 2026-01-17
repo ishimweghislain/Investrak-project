@@ -22,10 +22,103 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  investments   Investment[]
+  transactions  Transaction[]
+  reports       Report[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
   @@map("users")
 }
 
 enum Role {
   INVESTOR
   ADMIN
+}
+
+enum InvestmentStatus {
+  ACTIVE
+  PENDING
+  MATURED
+  CLOSED
+}
+
+model Investment {
+  id           String           @id @default(cuid())
+  title        String
+  amount       Float
+  status       InvestmentStatus @default(PENDING)
+  roi          Float?
+  startDate    DateTime?
+  maturityDate DateTime?
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  returns      Return[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("investments")
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  type        String
+  amount      Float
+  status      String
+  date        DateTime @default(now())
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("transactions")
+}
+
+model Return {
+  id           String     @id @default(cuid())
+  amount       Float
+  date         DateTime
+  investmentId String
+  investment   Investment @relation(fields: [investmentId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("returns")
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  type      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reports")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  isRead    Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+  ipAddress String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
 }

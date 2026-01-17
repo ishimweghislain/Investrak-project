@@ -1,296 +1,344 @@
 'use client';
 
+import Link from 'next/link';
+import {
+    BarChart3, Shield, CheckCircle, TrendingUp, Users,
+    FileText, ArrowRight, Lock, Globe, Mail, MapPin,
+    Phone, HelpCircle, AlertTriangle
+} from 'lucide-react';
+import LoginForm from '@/components/LoginForm';
 import { useState } from 'react';
-import { TrendingUp, Shield, BarChart3, Users, ArrowRight, Lock, User, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
 
-export default function Home() {
-  const [showLogin, setShowLogin] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+export default function LandingPage() {
+    const [showLogin, setShowLogin] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const loadingToast = toast.loading('Authenticating...', {
-      style: {
-        background: '#0a0c10',
-        color: '#fff',
-        border: '1px solid rgba(255,255,255,0.1)',
-      },
-    });
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      setTimeout(() => {
-        toast.dismiss(loadingToast);
-
-        if (response.ok) {
-          localStorage.setItem('token', data.token);
-          toast.success('Access Granted.', {
-            duration: 1500,
-            style: {
-              background: '#0a0c10',
-              color: '#fff',
-              border: '1px solid rgba(59,130,246,0.5)',
-            },
-          });
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 1500);
-        } else {
-          toast.error(data.message || 'Authentication Failed', {
-            duration: 3000,
-            style: {
-              background: '#0a0c10',
-              color: '#ef4444',
-              border: '1px solid rgba(239,68,68,0.2)',
-            },
-          });
-        }
-      }, 1500);
-    } catch (err) {
-      setTimeout(() => {
-        toast.dismiss(loadingToast);
-        toast.error('Network failure.', {
-          duration: 3000,
-          style: {
-            background: '#0a0c10',
-            color: '#ef4444',
-            border: '1px solid rgba(239,68,68,0.2)',
-          },
-        });
-      }, 1500);
-    } finally {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1500);
-    }
-  };
-
-  if (showLogin) {
     return (
-      <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center p-4 overflow-x-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-slate-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-600 selection:text-white">
 
-        <Toaster position="top-right" />
+            {/* Navbar */}
+            <nav className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-white/5">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <BarChart3 className="text-white w-5 h-5" />
+                        </div>
+                        <span className="text-xl font-bold text-white tracking-tight">Investrak</span>
+                    </div>
 
-        <div className="relative z-10 w-full max-w-[900px] flex flex-col md:flex-row bg-[#161b22]/60 backdrop-blur-3xl rounded-[32px] overflow-hidden border border-white/10 shadow-3xl">
-          {/* Left Side - Visual/Info */}
-          <div className="hidden lg:flex md:w-5/12 bg-gradient-to-br from-blue-600 to-slate-900 p-10 flex-col justify-between relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-            <div className="relative z-20">
-              <div className="flex items-center space-x-2 mb-8">
-                <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
-                  <TrendingUp className="w-6 h-6 text-white" />
+                    <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                        <Link href="#how-it-works" className="hover:text-white transition-colors">How It Works</Link>
+                        <Link href="#products" className="hover:text-white transition-colors">Investments</Link>
+                        <Link href="#transparency" className="hover:text-white transition-colors">Transparency</Link>
+                        <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => {
+                                const el = document.getElementById('login-section');
+                                el?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-full transition-all shadow-lg shadow-blue-600/20"
+                        >
+                            Client Login
+                        </button>
+                    </div>
                 </div>
-                <span className="text-xl font-bold text-white tracking-tighter">Investrak</span>
-              </div>
-              <h2 className="text-3xl font-bold text-white leading-tight mb-4 tracking-tight">
-                Secure <br />
-                <span className="text-blue-200">Asset Control</span>
-              </h2>
-              <p className="text-blue-100/70 text-sm max-w-sm leading-relaxed font-light">
-                Encrypted terminal for enterprise-level portfolio management.
-              </p>
-            </div>
+            </nav>
 
-            <div className="relative z-20 grid grid-cols-1 gap-3 mt-8 text-sm">
-              <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                <Shield className="w-5 h-5 text-blue-300 mb-2" />
-                <h4 className="text-white font-bold mb-0.5 text-xs">Vault Security</h4>
-                <p className="text-blue-100/50 text-[10px] font-medium uppercase tracking-widest">Active</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Form */}
-          <div className="w-full lg:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-[#161b22]/40">
-            <div className="mb-8 text-center lg:text-left">
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Access Portal</h1>
-              <p className="text-slate-400 text-sm font-light">Verification required for entry</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Identity</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-[#0d1117] border border-white/5 rounded-xl text-white text-sm placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium"
-                    placeholder="Username"
-                    required
-                  />
+            {/* Hero Section */}
+            <section className="relative pt-20 pb-32 overflow-hidden">
+                {/* Background Gradients */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
+                    <div className="absolute top-[10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
+                    <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px]"></div>
                 </div>
-              </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Secret Key</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-3 bg-[#0d1117] border border-white/5 rounded-xl text-white text-sm placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium"
-                    placeholder="••••••••"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-blue-400 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-900/30 border border-blue-500/30 rounded-full text-blue-400 text-xs font-bold uppercase tracking-widest mb-8">
+                            <Shield className="w-3 h-3" />
+                            Trusted by 500+ Investors
+                        </div>
+                        <h1 className="text-5xl lg:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight">
+                            Track your <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">investments</span> <br />
+                            securely.
+                        </h1>
+                        <p className="text-lg text-slate-400 mb-8 max-w-lg leading-relaxed">
+                            We provide a clear, safe, and easy way to watch your money grow. Get real-time updates, download reports, and rest easy knowing your funds are tracked.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Link href="#products" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-slate-900 rounded-full font-bold hover:bg-slate-100 transition-colors">
+                                View Plans
+                                <ArrowRight className="w-4 h-4" />
+                            </Link>
+                            <Link href="#contact" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-bold hover:bg-white/10 transition-colors">
+                                Contact Us
+                            </Link>
+                        </div>
+
+                        <div className="mt-12 flex items-center gap-8 border-t border-white/5 pt-8">
+                            <div>
+                                <p className="text-3xl font-bold text-white">$25M+</p>
+                                <p className="text-sm text-slate-500">Assets Managed</p>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-white">500+</p>
+                                <p className="text-sm text-slate-500">Happy Investors</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Login Card Integration in Hero */}
+                    <div id="login-section" className="relative">
+                        <div className="bg-[#0f141c] border border-white/10 rounded-3xl p-8 shadow-2xl max-w-md mx-auto lg:mx-0">
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Client Portal</h3>
+                                    <p className="text-sm text-slate-400">Secure Access</p>
+                                </div>
+                                <Lock className="w-5 h-5 text-blue-500" />
+                            </div>
+                            <LoginForm />
+                            <div className="mt-6 text-center text-xs text-slate-500 pt-6 border-t border-white/5">
+                                <p className="flex justify-center items-center gap-2 mb-2">
+                                    <Lock className="w-3 h-3" />
+                                    256-bit Bank Grade Encryption
+                                </p>
+                                Need an account? <Link href="#contact" className="text-blue-400 hover:underline">Contact Support</Link>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
+            </section>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 group text-sm mt-4 active:scale-[0.98]"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    <span>Authenticate</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-            </form>
+            {/* About Us */}
+            <section className="py-24 bg-slate-900/50">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="max-w-3xl">
+                        <h2 className="text-3xl font-bold text-white mb-6">Built on Transparency & Trust</h2>
+                        <p className="text-slate-400 text-lg leading-relaxed mb-4">
+                            Investrak was founded to solve a simple problem: investors didn&apos;t know what was happening with their money. We fixed that.
+                        </p>
+                        <p className="text-slate-400 text-lg leading-relaxed">
+                            Our mission is to provide complete clarity. We value <b>Safety</b>, <b>Honesty</b>, and <b>Growth</b>. We are a fully registered entity compliant with local financial regulations.
+                        </p>
+                    </div>
+                </div>
+            </section>
 
-            <div className="mt-10 flex flex-col items-center gap-4">
-              <button
-                onClick={() => setShowLogin(false)}
-                className="text-slate-500 hover:text-white text-xs transition-colors flex items-center gap-2 font-medium"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Return to Surface
-              </button>
-            </div>
-          </div>
+            {/* How It Works */}
+            <section id="how-it-works" className="py-24">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
+                        <p className="text-slate-400">Three simple steps to start earning.</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[
+                            { icon: Users, title: "1. Create Account", desc: "Contact our team to set up your verified investor profile." },
+                            { icon: TrendingUp, title: "2. Choose Plan", desc: "Select an investment product that matches your goals." },
+                            { icon: BarChart3, title: "3. Track Growth", desc: "Log in anytime to see your daily profit and download reports." }
+                        ].map((step, i) => (
+                            <div key={i} className="bg-slate-900/50 border border-white/5 p-8 rounded-2xl hover:bg-slate-800/50 transition-colors">
+                                <div className="w-14 h-14 bg-blue-600/10 text-blue-400 rounded-xl flex items-center justify-center mb-6">
+                                    <step.icon className="w-7 h-7" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
+                                <p className="text-slate-400 leading-relaxed">{step.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Investment Products */}
+            <section id="products" className="py-24 bg-slate-900/50">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                        <div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Investment Plans</h2>
+                            <p className="text-slate-400 max-w-xl">Curated opportunities designed for steady growth. <span className="text-yellow-500 flex items-center gap-1 mt-2 text-sm"><AlertTriangle className="w-4 h-4" /> All investments carry risk. Read terms carefully.</span></p>
+                        </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[
+                            { name: "Starter Growth", min: "$5,000", roi: "12% Target", duration: "12 Months", risk: "Low" },
+                            { name: "Balanced Yield", min: "$25,000", roi: "18% Target", duration: "24 Months", risk: "Medium" },
+                            { name: "High Velocity", min: "$50,000", roi: "24% Target", duration: "36 Months", risk: "High" },
+                        ].map((plan, i) => (
+                            <div key={i} className="bg-[#0f141c] border border-white/5 rounded-3xl p-8 hover:border-blue-500/30 transition-all group">
+                                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                                <div className="space-y-4 my-8">
+                                    <div className="flex justify-between border-b border-white/5 pb-2">
+                                        <span className="text-slate-500">Min. Investment</span>
+                                        <span className="text-white font-mono">{plan.min}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-white/5 pb-2">
+                                        <span className="text-slate-500">Duration</span>
+                                        <span className="text-white">{plan.duration}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-white/5 pb-2">
+                                        <span className="text-slate-500">Exp. Return</span>
+                                        <span className="text-green-400 font-bold">{plan.roi}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-white/5 pb-2">
+                                        <span className="text-slate-500">Risk Level</span>
+                                        <span className="text-white">{plan.risk}</span>
+                                    </div>
+                                </div>
+                                <button onClick={() => {
+                                    const el = document.getElementById('contact');
+                                    el?.scrollIntoView({ behavior: 'smooth' });
+                                }} className="w-full py-4 bg-white/5 hover:bg-white/10 rounded-xl text-white font-bold transition-colors">
+                                    Contact to Invest
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Transparency & Security */}
+            <section id="transparency" className="py-24">
+                <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16">
+                    <div>
+                        <h2 className="text-3xl font-bold text-white mb-6">Unmatched Transparency</h2>
+                        <div className="space-y-8">
+                            <div className="flex gap-4">
+                                <div className="mt-1"><FileText className="w-6 h-6 text-blue-500" /></div>
+                                <div>
+                                    <h3 className="font-bold text-white mb-1">Monthly Audit Reports</h3>
+                                    <p className="text-slate-400 text-sm">Every month, we upload detailed performance PDFs directly to your secure dashboard.</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="mt-1"><Users className="w-6 h-6 text-purple-500" /></div>
+                                <div>
+                                    <h3 className="font-bold text-white mb-1">Verified Partners</h3>
+                                    <p className="text-slate-400 text-sm">We work with top-tier auditors and banks to ensure your data is accurate.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-slate-900/30 border border-white/5 rounded-3xl p-8">
+                        <h2 className="text-2xl font-bold text-white mb-6">Bank-Grade Security</h2>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3 text-slate-300">
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                <span>256-bit SSL Encryption</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-slate-300">
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                <span>Secure Data Centers</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-slate-300">
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                <span>Strict Privacy Policy</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-slate-300">
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                <span>24/7 Monitoring</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Testimonials */}
+            <section className="py-24 bg-slate-900/50">
+                <div className="max-w-7xl mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-white text-center mb-12">What Our Investors Say</h2>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {[
+                            { quote: "Finally, a platform that doesn't hide anything. I can see my ROI daily.", author: "Sarah J.", role: "Business Owner" },
+                            { quote: "The reporting feature is excellent. My accountant loves the PDF exports.", author: "Michael R.", role: "Real Estate Investor" },
+                            { quote: "Secure, fast, and professional support. Highly recommended.", author: "David K.", role: "Tech Entrepreneur" }
+                        ].map((t, i) => (
+                            <div key={i} className="bg-[#0f141c] p-8 rounded-2xl border border-white/5">
+                                <p className="text-slate-300 mb-6 italic">&quot;{t.quote}&quot;</p>
+                                <div>
+                                    <p className="text-white font-bold">{t.author}</p>
+                                    <p className="text-slate-500 text-sm">{t.role}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* FAQ */}
+            <section id="faq" className="py-24">
+                <div className="max-w-3xl mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-white text-center mb-12">Common Questions</h2>
+                    <div className="space-y-4">
+                        {[
+                            { q: "How do I create an account?", a: "Accounts are invitation-only or strictly vetted. Please use the contact form below to request access." },
+                            { q: "Is my investment secure?", a: "We use industry-standard security measures and work with regulated financial partners." },
+                            { q: "When can I withdraw?", a: "Withdrawal terms depend on the specific plan you choose. Check key information documents." },
+                            { q: "Are there any fees?", a: "Our management fee is transparently listed on every contract. No hidden charges." }
+                        ].map((faq, i) => (
+                            <div key={i} className="bg-slate-900/30 border border-white/5 p-6 rounded-xl">
+                                <h3 className="font-bold text-white mb-2">{faq.q}</h3>
+                                <p className="text-slate-400 text-sm">{faq.a}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Contact */}
+            <section id="contact" className="py-24 bg-blue-900/20 border-t border-blue-500/10">
+                <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16">
+                    <div>
+                        <h2 className="text-3xl font-bold text-white mb-6">Get In Touch</h2>
+                        <p className="text-slate-400 mb-8">Ready to start? Have questions? Our team is here to help.</p>
+
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-4 text-slate-300">
+                                <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center"><Mail className="w-5 h-5" /></div>
+                                <span>support@investrak.com</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-slate-300">
+                                <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center"><Phone className="w-5 h-5" /></div>
+                                <span>+1 (555) 123-4567</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-slate-300">
+                                <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center"><MapPin className="w-5 h-5" /></div>
+                                <span>123 Finance District, New York, NY</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-[#0f141c] p-8 rounded-3xl border border-white/10">
+                        <form className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <input type="text" placeholder="First Name" className="w-full bg-slate-900 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500" />
+                                <input type="text" placeholder="Last Name" className="w-full bg-slate-900 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500" />
+                            </div>
+                            <input type="email" placeholder="Email Address" className="w-full bg-slate-900 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500" />
+                            <textarea rows={4} placeholder="Your Message" className="w-full bg-slate-900 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500"></textarea>
+                            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-black py-12 border-t border-white/10">
+                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-slate-500 text-sm">
+                    <p>&copy; 2026 Investrak Platform. All rights reserved.</p>
+                    <div className="flex gap-6 mt-4 md:mt-0">
+                        <Link href="#" className="hover:text-white">Privacy Policy</Link>
+                        <Link href="#" className="hover:text-white">Terms of Service</Link>
+                        <Link href="#" className="hover:text-white">Admin Login</Link>
+                    </div>
+                </div>
+            </footer>
+
         </div>
-      </div>
     );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#0a0c10] text-white selection:bg-blue-600/30 overflow-x-hidden">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/10 rounded-full blur-[120px]"></div>
-      </div>
-
-      <nav className="relative z-50 px-6 py-6 max-w-6xl mx-auto flex justify-between items-center">
-        <div className="flex items-center space-x-2 group">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30 group-hover:scale-110 transition-transform duration-500">
-            <TrendingUp className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold tracking-tighter">Investrak</span>
-        </div>
-        <div className="flex items-center gap-4 md:gap-6">
-          <button className="hidden sm:block text-slate-500 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest">Solutions</button>
-          <button
-            onClick={() => setShowLogin(true)}
-            className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all font-bold text-xs backdrop-blur-md active:scale-95"
-          >
-            Terminal Access
-          </button>
-        </div>
-      </nav>
-
-      <main className="relative z-10 pt-12 md:pt-20 pb-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 animate-fade-in shadow-lg shadow-blue-600/5">
-            <Shield className="w-3.5 h-3.5" />
-            Institutional Portfolio Infrastructure
-          </div>
-
-          <h1 className="text-4xl md:text-6xl font-bold mb-8 tracking-tighter leading-[1.1]">
-            Automate Your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-200 to-slate-400">
-              Wealth Strategy
-            </span>
-          </h1>
-
-          <p className="text-base md:text-lg text-slate-500 max-w-xl mx-auto mb-12 leading-relaxed font-light">
-            Engineered for high-performing institutional managers. Real-time capital intelligence with surgical precision.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => setShowLogin(true)}
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-base transition-all shadow-2xl shadow-blue-600/30 flex items-center justify-center gap-2 group active:scale-95"
-            >
-              Enter Dashboard
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="px-8 py-4 bg-[#161b22]/40 hover:bg-[#161b22]/60 border border-white/5 rounded-2xl font-bold text-base transition-all backdrop-blur-xl group">
-              Interface Demo
-            </button>
-          </div>
-        </div>
-
-        {/* System Preview */}
-        <div className="max-w-5xl mx-auto mt-24 relative">
-          <div className="bg-[#161b22]/40 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden shadow-3xl">
-            <div className="h-8 bg-[#0d1117]/80 border-b border-white/5 flex items-center px-6 gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-red-500/30"></div>
-              <div className="w-2 h-2 rounded-full bg-yellow-500/30"></div>
-              <div className="w-2 h-2 rounded-full bg-green-500/30"></div>
-            </div>
-            <div className="p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-              {[
-                { icon: BarChart3, title: 'Quant Intel', desc: 'Predictive market modeling with precision analytics.' },
-                { icon: Shield, title: 'Cyber Vault', desc: 'Sovereign security architecture protecting your assets.' },
-                { icon: Users, title: 'Multi-Node', desc: 'Manage complex investor structures with granular control.' }
-              ].map((feature, i) => (
-                <div key={i} className="space-y-4 group">
-                  <div className="w-12 h-12 bg-blue-600/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-blue-500/10">
-                    <feature.icon className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-bold tracking-tight text-white">{feature.title}</h3>
-                  <p className="text-slate-500 leading-relaxed font-light text-sm">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <footer className="border-t border-white/5 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center space-x-2 text-slate-600">
-            <TrendingUp className="w-5 h-5" />
-            <span className="font-bold tracking-tighter text-lg">Investrak</span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
-            <button className="hover:text-blue-400 transition-colors">Privacy Vault</button>
-            <button className="hover:text-blue-400 transition-colors">Legal Framework</button>
-            <button className="hover:text-blue-400 transition-colors">Security Node</button>
-          </div>
-          <p className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">© 2026 Sovereign Systems</p>
-        </div>
-      </footer>
-    </div>
-  );
 }
