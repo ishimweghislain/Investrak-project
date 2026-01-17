@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft, TrendingUp, DollarSign, Calendar, Save, Bell, Send } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 export default function ManageInvestors() {
     const [investors, setInvestors] = useState<any[]>([]);
@@ -320,7 +320,7 @@ export default function ManageInvestors() {
         <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-slate-100 p-4 md:p-8 relative overflow-hidden pb-32 transition-colors">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-            <Toaster position="top-right" />
+
 
             <div className="max-w-7xl mx-auto relative z-10">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
