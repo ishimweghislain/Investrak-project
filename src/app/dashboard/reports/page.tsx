@@ -88,7 +88,7 @@ export default function ReportsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#0a0c10] text-white p-6 pb-24 md:pb-10 md:pt-10">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] dark:text-white text-slate-900 p-6 pb-24 md:pb-10 md:pt-10 transition-colors">
             <Toaster position="top-right" />
 
             <div className="max-w-4xl mx-auto flex justify-between items-center mb-6">

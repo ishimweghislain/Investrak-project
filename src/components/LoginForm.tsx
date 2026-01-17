@@ -38,7 +38,7 @@ export default function LoginForm() {
 
     return (
         <form onSubmit={handleLogin} className="p-6">
-            <Toaster position="top-right" />
+            <Toaster position="top-right" toastOptions={{ style: { zIndex: 99999 } }} containerStyle={{ zIndex: 99999 }} />
             <h2 className="text-xl font-bold dark:text-white text-slate-900 mb-4">Sign In</h2>
             <div className="space-y-4">
                 <div>

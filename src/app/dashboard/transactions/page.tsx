@@ -36,8 +36,8 @@ export default function TransactionsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#0a0c10] text-white p-6 pb-24 md:pb-10 md:pt-10">
-            <button onClick={() => router.back()} className="mb-6 flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] dark:text-white text-slate-900 p-6 pb-24 md:pb-10 md:pt-10 transition-colors">
+            <button onClick={() => router.back()} className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors text-sm font-bold uppercase tracking-wider">
                 <ArrowLeft className="w-4 h-4" /> Back
             </button>
             <div className="max-w-4xl mx-auto">

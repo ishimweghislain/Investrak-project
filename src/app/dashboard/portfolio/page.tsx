@@ -65,27 +65,27 @@ export default function PortfolioPage() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-500" />
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-[#0a0c10] text-white p-6 pb-24 md:pb-10 md:pt-10">
-            <button onClick={() => router.back()} className="mb-6 flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-white p-6 pb-24 md:pb-10 md:pt-10 transition-colors">
+            <button onClick={() => router.back()} className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors text-sm font-bold uppercase tracking-wider">
                 <ArrowLeft className="w-4 h-4" /> Back
             </button>
 
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Portfolio Analysis</h1>
-                    <button onClick={fetchData} className="p-2 bg-white/5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Portfolio Analysis</h1>
+                    <button onClick={fetchData} className="p-2 bg-slate-200 dark:bg-white/5 rounded-lg hover:bg-slate-300 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                         <RefreshCw className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Main Stats Card */}
-                <div className="bg-gradient-to-br from-blue-900 via-[#161b22] to-[#161b22] p-8 rounded-[32px] border border-white/10 mb-8 relative overflow-hidden shadow-2xl">
+                <div className="bg-gradient-to-br from-blue-600 to-blue-900 p-8 rounded-[32px] border border-blue-500/20 text-white mb-8 relative overflow-hidden shadow-2xl">
                     <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none"></div>
                     <div className="relative z-10">
                         <span className="text-blue-300 font-bold text-xs uppercase tracking-widest mb-2 block">Total Capital Deployed</span>
@@ -98,16 +98,16 @@ export default function PortfolioPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-[#161b22]/40 p-6 rounded-[24px] border border-white/5">
+                    <div className="bg-white dark:bg-[#161b22]/40 p-6 rounded-[24px] border border-slate-200 dark:border-white/5 shadow-sm">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-purple-600/10 rounded-xl flex items-center justify-center text-purple-400">
+                            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-600/10 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400">
                                 <Wallet className="w-5 h-5" />
                             </div>
                             <h3 className="font-bold text-lg">Visual Breakdown</h3>
                         </div>
                         <div className="aspect-square relative flex items-center justify-center mx-auto mb-4">
                             {/* Simple CSS Pie Chart representation */}
-                            <div className="w-48 h-48 rounded-full border-[16px] border-[#0d1117] relative overflow-hidden"
+                            <div className="w-48 h-48 rounded-full border-[16px] border-slate-50 dark:border-[#0d1117] relative overflow-hidden"
                                 style={{
                                     background: `conic-gradient(
                                         ${stats.allocation.map((a, i, arr) => {
@@ -127,21 +127,21 @@ export default function PortfolioPage() {
                         </div>
                     </div>
 
-                    <div className="bg-[#161b22]/40 p-6 rounded-[24px] border border-white/5">
+                    <div className="bg-white dark:bg-[#161b22]/40 p-6 rounded-[24px] border border-slate-200 dark:border-white/5 shadow-sm">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-indigo-600/10 rounded-xl flex items-center justify-center text-indigo-400">
+                            <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-600/10 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                                 <PieChart className="w-5 h-5" />
                             </div>
-                            <h3 className="font-bold text-lg">Asset Allocation</h3>
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Asset Allocation</h3>
                         </div>
                         <div className="space-y-6">
                             {stats.allocation.map(item => (
                                 <div key={item.name}>
                                     <div className="flex justify-between text-sm mb-2 font-medium">
-                                        <span className="text-slate-300">{item.name}</span>
-                                        <span className="text-white font-bold">{item.pct}%</span>
+                                        <span className="text-slate-500 dark:text-slate-300">{item.name}</span>
+                                        <span className="text-slate-900 dark:text-white font-bold">{item.pct}%</span>
                                     </div>
-                                    <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden">
+                                    <div className="w-full bg-slate-100 dark:bg-white/5 rounded-full h-2.5 overflow-hidden">
                                         <div className={`h-full rounded-full ${item.color} shadow-lg shadow-${item.color.split('-')[1]}-500/50`} style={{ width: `${item.pct}%` }}></div>
                                     </div>
                                 </div>

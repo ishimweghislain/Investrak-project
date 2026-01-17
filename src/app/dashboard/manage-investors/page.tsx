@@ -310,14 +310,14 @@ export default function ManageInvestors() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-blue-600 dark:text-blue-500 animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0c10] text-slate-100 p-4 md:p-8 relative overflow-hidden pb-32">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-slate-100 p-4 md:p-8 relative overflow-hidden pb-32 transition-colors">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
 
             <Toaster position="top-right" />
@@ -325,18 +325,18 @@ export default function ManageInvestors() {
             <div className="max-w-7xl mx-auto relative z-10">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                     <div>
-                        <div className="flex items-center gap-1.5 text-blue-400 mb-2 group cursor-pointer" onClick={() => window.location.href = '/dashboard'}>
+                        <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 mb-2 group cursor-pointer" onClick={() => window.location.href = '/dashboard'}>
                             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
                             <span className="text-xs font-medium">Back to Portal</span>
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
                             Investor Directory
                         </h1>
-                        <p className="text-slate-400 text-sm mt-0.5">Manage institutional access settings</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Manage institutional access settings</p>
                     </div>
                     <button
                         onClick={() => { resetForm(); setIsAdding(true); }}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-xl shadow-blue-600/20 font-bold text-sm"
+                        className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-xl shadow-blue-600/20 font-bold text-sm text-white"
                     >
                         <Plus className="w-4 h-4" />
                         Provision Investor
@@ -345,7 +345,7 @@ export default function ManageInvestors() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {investors.map((investor) => (
-                        <div key={investor.id} className="bg-[#161b22]/40 border border-white/5 p-5 rounded-[24px] backdrop-blur-xl hover:bg-[#1c2128]/60 transition-all group relative overflow-hidden flex flex-col h-full">
+                        <div key={investor.id} className="bg-white dark:bg-[#161b22]/40 border border-slate-200 dark:border-white/5 p-5 rounded-[24px] backdrop-blur-xl hover:shadow-xl dark:hover:bg-[#1c2128]/60 transition-all group relative overflow-hidden flex flex-col h-full shadow-sm">
                             <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
                                 <button
                                     onClick={() => openEditModal(investor)}
@@ -363,9 +363,9 @@ export default function ManageInvestors() {
 
                             <div className="mb-4">
                                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600/20 to-slate-600/20 rounded-xl flex items-center justify-center mb-3 border border-white/5">
-                                    <Building2 className="w-5 h-5 text-blue-400" />
+                                    <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                 </div>
-                                <h3 className="text-lg font-bold text-white truncate pr-12">{investor.username}</h3>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate pr-12">{investor.username}</h3>
                                 <div className="flex items-center gap-1.5 text-slate-400 text-[10px] mt-0.5 font-bold uppercase tracking-wider">
                                     <Shield className="w-2.5 h-2.5" />
                                     <span>Investor Account</span>
@@ -373,16 +373,16 @@ export default function ManageInvestors() {
                             </div>
 
                             <div className="space-y-3 flex-grow">
-                                <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                                <div className="p-3 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5">
                                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">Affiliation</p>
-                                    <p className="text-white font-medium truncate text-sm">{investor.company || 'N/A'}</p>
+                                    <p className="text-slate-700 dark:text-white font-medium truncate text-sm">{investor.company || 'N/A'}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-2 mt-4">
                                 <button
                                     onClick={() => openInvestmentsModal(investor)}
-                                    className="col-span-2 w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all border border-white/5 flex items-center justify-center gap-2 text-xs"
+                                    className="col-span-2 w-full bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold py-3 rounded-xl transition-all border border-slate-200 dark:border-white/5 flex items-center justify-center gap-2 text-xs"
                                 >
                                     <TrendingUp className="w-3.5 h-3.5" />
                                     Manage Assets
@@ -395,19 +395,19 @@ export default function ManageInvestors() {
 
             {/* Manage Investments Modal */}
             {isManagingInvestments && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-[#0a0c10]/90 backdrop-blur-md" onClick={() => setIsManagingInvestments(false)}></div>
-                    <div className="relative bg-[#161b22] border border-white/10 w-full max-w-5xl max-h-[90vh] rounded-[32px] p-8 overflow-hidden flex flex-col">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 dark:bg-[#0a0c10]/90 backdrop-blur-md" onClick={() => setIsManagingInvestments(false)}></div>
+                    <div className="relative bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 w-full max-w-5xl max-h-[90vh] rounded-[32px] p-8 overflow-hidden flex flex-col shadow-2xl">
                         <div className="flex justify-between items-center mb-6">
                             <div>
-                                <h2 className="text-2xl font-bold text-white">Portfolio Management</h2>
-                                <p className="text-slate-400 text-sm">Managing assets for <span className="text-blue-400">{selectedInvestor?.username}</span></p>
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Portfolio Management</h2>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm">Managing assets for <span className="text-blue-600 dark:text-blue-400">{selectedInvestor?.username}</span></p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => setIsSendingNotification(!isSendingNotification)} className={`p-2 rounded-full transition-colors ${isSendingNotification ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}>
+                                <button onClick={() => setIsSendingNotification(!isSendingNotification)} className={`p-2 rounded-full transition-colors ${isSendingNotification ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
                                     <Bell className="w-5 h-5" />
                                 </button>
-                                <button onClick={() => setIsManagingInvestments(false)} className="bg-white/5 p-2 rounded-full hover:bg-white/10 transition-colors">
+                                <button onClick={() => setIsManagingInvestments(false)} className="bg-slate-100 dark:bg-white/5 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-slate-500 dark:text-slate-400">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
@@ -420,7 +420,7 @@ export default function ManageInvestors() {
                                 <form onSubmit={handleSendNotification} className="flex gap-2">
                                     <input autoFocus type="text" className="flex-1 bg-[#0d1117] border border-white/10 rounded-lg px-3 text-sm focus:border-blue-500/50 outline-none"
                                         placeholder="Message content..." value={notificationMessage} onChange={e => setNotificationMessage(e.target.value)} required />
-                                    <button className="bg-blue-600 hover:bg-blue-500 px-4 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
+                                    <button className="bg-blue-600 hover:bg-blue-500 px-4 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors text-white">
                                         <Send className="w-3 h-3" /> Send
                                     </button>
                                 </form>
@@ -429,10 +429,10 @@ export default function ManageInvestors() {
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-hidden h-full">
                             {/* Left: Add/Edit */}
-                            <div className="lg:col-span-1 bg-[#0d1117] p-6 rounded-2xl border border-white/5 overflow-y-auto">
+                            <div className="lg:col-span-1 bg-slate-50 dark:bg-[#0d1117] p-6 rounded-2xl border border-slate-200 dark:border-white/5 overflow-y-auto">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold text-white flex items-center gap-2">
-                                        {editingInvestment ? <Edit2 className="w-4 h-4 text-orange-400" /> : <Plus className="w-4 h-4 text-blue-400" />}
+                                    <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        {editingInvestment ? <Edit2 className="w-4 h-4 text-orange-400" /> : <Plus className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
                                         {editingInvestment ? 'Update Asset' : 'Allocate Asset'}
                                     </h3>
                                     {editingInvestment && (
@@ -442,34 +442,34 @@ export default function ManageInvestors() {
                                 <form onSubmit={handleSaveInvestment} className="space-y-3">
                                     <div>
                                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asset Name</label>
-                                        <input type="text" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                        <input type="text" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
                                             value={investmentForm.title} onChange={e => setInvestmentForm({ ...investmentForm, title: e.target.value })} required placeholder="e.g. Tech Growth Fund" />
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Principal ($)</label>
-                                        <input type="number" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                        <input type="number" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
                                             value={investmentForm.amount} onChange={e => setInvestmentForm({ ...investmentForm, amount: e.target.value })} required placeholder="0.00" />
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Target ROI (%)</label>
-                                        <input type="number" step="0.1" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                        <input type="number" step="0.1" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
                                             value={investmentForm.roi} onChange={e => setInvestmentForm({ ...investmentForm, roi: e.target.value })} placeholder="0.0" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
                                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Start Date</label>
-                                            <input type="date" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-xs text-white focus:border-blue-500/50 outline-none"
+                                            <input type="date" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
                                                 value={investmentForm.startDate} onChange={e => setInvestmentForm({ ...investmentForm, startDate: e.target.value })} />
                                         </div>
                                         <div>
                                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Maturity</label>
-                                            <input type="date" className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-xs text-white focus:border-blue-500/50 outline-none"
+                                            <input type="date" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
                                                 value={investmentForm.maturityDate} onChange={e => setInvestmentForm({ ...investmentForm, maturityDate: e.target.value })} />
                                         </div>
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</label>
-                                        <select className="w-full bg-[#161b22] border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-blue-500/50 outline-none"
+                                        <select className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
                                             value={investmentForm.status} onChange={e => setInvestmentForm({ ...investmentForm, status: e.target.value })}>
                                             <option value="PENDING">Pending</option>
                                             <option value="ACTIVE">Active</option>
@@ -485,17 +485,17 @@ export default function ManageInvestors() {
 
                             {/* Right: List */}
                             <div className="lg:col-span-2 overflow-y-auto pr-2">
-                                <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                                    <Building2 className="w-4 h-4 text-slate-400" /> Current Holdings
+                                <h3 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <Building2 className="w-4 h-4 text-slate-500 dark:text-slate-400" /> Current Holdings
                                 </h3>
                                 {loadingInvestments ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" /></div> : (
                                     <div className="space-y-3">
                                         {userInvestments.map(inv => (
-                                            <div key={inv.id} className={`bg-[#0d1117] p-4 rounded-xl border flex justify-between items-center group transition-all ${editingInvestment?.id === inv.id ? 'border-orange-500/50 bg-orange-500/5' : 'border-white/5 hover:border-blue-500/20'}`}>
+                                            <div key={inv.id} className={`bg-slate-50 dark:bg-[#0d1117] p-4 rounded-xl border flex justify-between items-center group transition-all ${editingInvestment?.id === inv.id ? 'border-orange-500/50 bg-orange-500/5' : 'border-slate-200 dark:border-white/5 hover:border-blue-500/20'}`}>
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className="font-bold text-white">{inv.title}</h4>
-                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inv.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'
+                                                        <h4 className="font-bold text-slate-900 dark:text-white">{inv.title}</h4>
+                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inv.status === 'ACTIVE' ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                                                             }`}>{inv.status}</span>
                                                     </div>
                                                     <div className="flex items-center gap-4 text-xs text-slate-400">
@@ -529,37 +529,37 @@ export default function ManageInvestors() {
 
             {/* Provision/Edit Modal */}
             {(isAdding || isEditing) && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-[#0a0c10]/80 backdrop-blur-md" onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}></div>
-                    <div className="relative bg-[#161b22] border border-white/10 w-full max-w-md rounded-[32px] p-8 md:p-10 shadow-2xl overflow-hidden">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 dark:bg-[#0a0c10]/80 backdrop-blur-md" onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}></div>
+                    <div className="relative bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 w-full max-w-md rounded-[32px] p-8 md:p-10 shadow-2xl overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
-                        <button onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+                        <button onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }} className="absolute top-6 right-6 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
                             <X className="w-6 h-6" />
                         </button>
-                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{isAdding ? 'Provision Investor' : 'Update Profile'}</h2>
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2">{isAdding ? 'Provision Investor' : 'Update Profile'}</h2>
                         <form onSubmit={isAdding ? handleCreateInvestor : handleUpdateInvestor} className="space-y-4 mt-6">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Username</label>
                                 <input type="text" required value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="Username" />
+                                    className="w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-900 dark:text-white text-sm" placeholder="Username" />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Venture Name</label>
+                                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Venture Name</label>
                                 <input type="text" required value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="Company" />
+                                    className="w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-900 dark:text-white text-sm" placeholder="Company" />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Email</label>
                                 <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="Email (Optional)" />
+                                    className="w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-900 dark:text-white text-sm" placeholder="Email (Optional)" />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Secret Key</label>
+                                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Secret Key</label>
                                 <input type="password" required={isAdding} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full bg-[#0d1117] border border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-white text-sm" placeholder="••••••••" />
+                                    className="w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-900 dark:text-white text-sm" placeholder="••••••••" />
                             </div>
                             <button disabled={submitting} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-xl shadow-blue-600/20 transition-all flex justify-center gap-2 mt-4 text-sm">
-                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAdding ? 'Confrm Provisioning' : 'Apply Changes')}
+                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAdding ? 'Confirm Provisioning' : 'Apply Changes')}
                             </button>
                         </form>
                     </div>
@@ -568,13 +568,13 @@ export default function ManageInvestors() {
 
             {/* Delete Modal */}
             {isDeleting && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-[#0a0c10]/90 backdrop-blur-sm" onClick={() => setIsDeleting(false)}></div>
-                    <div className="relative bg-[#161b22] border border-red-500/20 w-full max-w-sm rounded-[32px] p-8 shadow-2xl text-center">
-                        <div className="w-16 h-16 bg-red-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Trash2 className="w-8 h-8 text-red-500" />
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 dark:bg-[#0a0c10]/90 backdrop-blur-sm" onClick={() => setIsDeleting(false)}></div>
+                    <div className="relative bg-white dark:bg-[#161b22] border border-red-500/20 w-full max-w-sm rounded-[32px] p-8 shadow-2xl text-center">
+                        <div className="w-16 h-16 bg-red-100 dark:bg-red-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Trash2 className="w-8 h-8 text-red-600 dark:text-red-500" />
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">Revoke Access?</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Revoke Access?</h2>
                         <div className="grid grid-cols-2 gap-3 mt-8">
                             <button onClick={() => setIsDeleting(false)} className="bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all text-sm">Cancel</button>
                             <button onClick={handleDeleteInvestor} disabled={submitting} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all text-sm">Confirm</button>
