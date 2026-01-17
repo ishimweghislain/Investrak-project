@@ -89,7 +89,7 @@ export default function ManageInvestors() {
 
             if (response.ok) {
                 toast.success('Investor created successfully');
-                setInvestors([...investors, data.user]);
+                setInvestors([...investors, data]);
                 setIsAdding(false);
                 resetForm();
             } else {
@@ -108,20 +108,20 @@ export default function ManageInvestors() {
         const token = localStorage.getItem('token');
 
         try {
-            const response = await fetch(`/api/admin/investors?id=${selectedInvestor.id}`, {
+            const response = await fetch(`/api/admin/investors`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ ...formData, id: selectedInvestor.id })
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 toast.success('Investor updated successfully');
-                setInvestors(investors.map(inv => inv.id === selectedInvestor.id ? data.user : inv));
+                setInvestors(investors.map(inv => inv.id === selectedInvestor.id ? data : inv));
                 setIsEditing(false);
                 resetForm();
             } else {
@@ -576,7 +576,7 @@ export default function ManageInvestors() {
                         </div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Revoke Access?</h2>
                         <div className="grid grid-cols-2 gap-3 mt-8">
-                            <button onClick={() => setIsDeleting(false)} className="bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all text-sm">Cancel</button>
+                            <button onClick={() => setIsDeleting(false)} className="bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold py-3 rounded-xl transition-all text-sm">Cancel</button>
                             <button onClick={handleDeleteInvestor} disabled={submitting} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all text-sm">Confirm</button>
                         </div>
                     </div>
