@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,6 +17,7 @@ export default function ManageInvestors() {
     // Investor Form Data
     const [formData, setFormData] = useState({
         username: '',
+        company: '',
         password: '',
         email: '',
         profileImage: ''
