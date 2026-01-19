@@ -483,9 +483,9 @@ export default function ManageInvestors() {
                                             value={investmentForm.title} onChange={e => setInvestmentForm({ ...investmentForm, title: e.target.value })} required placeholder="e.g. Strategic Growth Plan" />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Total Principal Amount</label>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Total Principal Amount (RWF)</label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[10px]">RWF</span>
                                             <input type="number" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-xl p-3 pl-7 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                                                 value={investmentForm.amount} onChange={e => setInvestmentForm({ ...investmentForm, amount: e.target.value })} required placeholder="0.00" />
                                         </div>
@@ -495,7 +495,7 @@ export default function ManageInvestors() {
                                             <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1.5">Auto-Calculated Monthly Payment</p>
                                             <div className="flex items-baseline gap-1">
                                                 <span className="text-xl font-bold text-slate-900 dark:text-white">
-                                                    ${(parseFloat(investmentForm.amount) / 60).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    RWF {(parseFloat(investmentForm.amount) / 60).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                                 </span>
                                                 <span className="text-xs text-slate-500 font-medium">/ month</span>
                                             </div>

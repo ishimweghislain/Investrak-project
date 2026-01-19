@@ -147,7 +147,7 @@ export default function PortfolioPage() {
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <span className="text-blue-200 font-bold text-[10px] uppercase tracking-[0.2em] mb-1 block">Total Portfolio Goal</span>
-                                            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter">${stats.investment.amount.toLocaleString()}</h2>
+                                            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter">RWF {stats.investment.amount.toLocaleString()}</h2>
                                         </div>
                                         <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10">
                                             <span className="text-[10px] font-bold text-blue-100 uppercase tracking-widest block mb-1">Current Progress</span>
@@ -158,7 +158,7 @@ export default function PortfolioPage() {
                                     <div className="space-y-3">
                                         <div className="flex justify-between text-sm font-bold">
                                             <span>Maturity Completion</span>
-                                            <span className="text-blue-200">${stats.totalPaid.toLocaleString()} Contribution</span>
+                                            <span className="text-blue-200">RWF {stats.totalPaid.toLocaleString()} Contribution</span>
                                         </div>
                                         <div className="w-full h-4 bg-black/20 rounded-full p-1 overflow-hidden">
                                             <div className="h-full bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-1000" style={{ width: `${stats.progress}%` }}></div>
@@ -168,7 +168,7 @@ export default function PortfolioPage() {
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4">
                                         <div className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
                                             <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Monthly Draft</span>
-                                            <p className="text-lg font-bold">${stats.monthlyRequirement.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                                            <p className="text-lg font-bold">RWF {stats.monthlyRequirement.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                                         </div>
                                         <div className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
                                             <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Timeline</span>
@@ -220,7 +220,7 @@ export default function PortfolioPage() {
 
                                     <div className="space-y-6">
                                         <div className="space-y-4">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Installment Amount ($)</label>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Installment Amount (RWF)</label>
                                             <div className="relative group">
                                                 <input
                                                     type="number"

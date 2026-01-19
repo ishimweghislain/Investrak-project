@@ -59,7 +59,7 @@ export default function TransactionsPage() {
                             <div className="flex justify-between sm:block text-right">
                                 <span className={`block text-lg font-bold ${tx.type === 'DEPOSIT' || tx.type === 'PROFIT' ? 'text-green-400' : 'text-white'
                                     }`}>
-                                    {tx.type === 'WITHDRAWAL' ? '-' : '+'}${tx.amount.toLocaleString()}
+                                    {tx.type === 'WITHDRAWAL' ? '-' : '+'}RWF {tx.amount.toLocaleString()}
                                 </span>
                                 <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-white/5 px-2 py-0.5 rounded ml-auto w-fit block sm:mt-1">
                                     {tx.status}

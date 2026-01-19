@@ -9,30 +9,77 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        let reports;
-        if (user.role === 'ADMIN') {
-            const { searchParams } = new URL(request.url);
-            const userId = searchParams.get('userId');
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+        const period = searchParams.get('period'); // 'week', 'month', 'year', 'all'
 
-            if (userId) {
-                reports = await prisma.report.findMany({
-                    where: { userId },
-                    orderBy: { createdAt: 'desc' }
-                });
-            } else {
-                reports = await prisma.report.findMany({
-                    include: { user: { select: { username: true } } },
-                    orderBy: { createdAt: 'desc' }
-                });
-            }
-        } else {
-            reports = await prisma.report.findMany({
-                where: { userId: user.id },
-                orderBy: { createdAt: 'desc' }
-            });
+        let dateFilter: any = {};
+        if (period === 'week') {
+            const date = new Date();
+            date.setDate(date.getDate() - 7);
+            dateFilter = { createdAt: { gte: date } };
+        } else if (period === 'month') {
+            const date = new Date();
+            date.setMonth(date.getMonth() - 1);
+            dateFilter = { createdAt: { gte: date } };
+        } else if (period === 'year') {
+            const date = new Date();
+            date.setFullYear(date.getFullYear() - 1);
+            dateFilter = { createdAt: { gte: date } };
         }
 
-        return NextResponse.json(reports);
+        // Fetch Manual Reports
+        let manualReports;
+        let query: any = { ...dateFilter };
+        if (user.role !== 'ADMIN') {
+            query.userId = user.id;
+        } else if (userId) {
+            query.userId = userId;
+        }
+
+        manualReports = await prisma.report.findMany({
+            where: query,
+            include: { user: { select: { username: true } } },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // Convert Payment Transactions to "Reports"
+        let txQuery: any = {
+            type: 'PAYMENT',
+            status: 'COMPLETED',
+            ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {})
+        };
+
+        if (user.role !== 'ADMIN') {
+            txQuery.userId = user.id;
+        } else if (userId) {
+            txQuery.userId = userId;
+        }
+
+        const payments = await prisma.transaction.findMany({
+            where: txQuery,
+            include: { user: { select: { username: true } } },
+            orderBy: { date: 'desc' }
+        });
+
+        const paymentReports = payments.map(p => ({
+            id: p.id,
+            title: `Payment Receipt: RWF ${p.amount.toLocaleString()}`,
+            url: '#', // Receipts are generated client-side from transaction data
+            type: 'RECEIPT',
+            createdAt: p.date,
+            user: p.user,
+            userId: p.userId,
+            amount: p.amount,
+            description: p.description
+        }));
+
+        // Combine and Sort
+        const allReports = [...manualReports, ...paymentReports].sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        return NextResponse.json(allReports);
     } catch (error) {
         console.error('Failed to fetch reports:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
