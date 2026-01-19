@@ -9,6 +9,39 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        // Auto-activate investments that have reached their start date
+        const pendingInvestments = await prisma.investment.findMany({
+            where: {
+                status: 'PENDING',
+                startDate: { lte: new Date() }
+            }
+        });
+
+        for (const inv of pendingInvestments) {
+            await prisma.investment.update({
+                where: { id: inv.id },
+                data: { status: 'ACTIVE' }
+            });
+
+            // Notify investor
+            await prisma.notification.create({
+                data: {
+                    userId: inv.userId,
+                    message: `Welcome! Your investment "${inv.title}" has officially started. You can now begin your monthly installments.`,
+                    isRead: false
+                }
+            });
+
+            // Log
+            await prisma.auditLog.create({
+                data: {
+                    action: 'INVESTMENT_ACTIVATED',
+                    details: `Investment ${inv.id} auto-activated on start date`,
+                    userId: inv.userId
+                }
+            });
+        }
+
         let investments;
         if (user.role === 'ADMIN') {
             const { searchParams } = new URL(request.url);
@@ -49,16 +82,20 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { title, amount, userId, startDate, maturityDate, roi, status } = body;
+        const { title, amount, userId, startDate, status } = body;
+
+        const start = startDate ? new Date(startDate) : new Date();
+        const maturity = new Date(start);
+        maturity.setFullYear(maturity.getFullYear() + 5);
 
         const investment = await prisma.investment.create({
             data: {
-                title,
+                title: title || "Strategic Cash Investment",
                 amount: parseFloat(amount),
                 userId,
-                startDate: startDate ? new Date(startDate) : undefined,
-                maturityDate: maturityDate ? new Date(maturityDate) : undefined,
-                roi: roi ? parseFloat(roi) : undefined,
+                startDate: start,
+                maturityDate: maturity,
+                roi: 0,
                 status: status || 'PENDING'
             }
         });

@@ -42,32 +42,63 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const user = await verifyAuth(request);
-    if (!user || user.role !== 'ADMIN') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    const auth = await verifyAuth(request);
+    if (!auth) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     try {
         const body = await request.json();
         const { type, amount, status, description, userId, date } = body;
 
+        // Security check: Investors can only create transactions for themselves
+        const targetUserId = auth.role === 'ADMIN' ? userId : auth.id;
+
         const transaction = await prisma.transaction.create({
             data: {
-                type,
+                type: type || 'PAYMENT',
                 amount: parseFloat(amount),
                 status: status || 'COMPLETED',
-                description,
-                userId,
+                description: description || `Payment via ${body.paymentMethod || 'Mock Gateway'}`,
+                userId: targetUserId,
                 date: date ? new Date(date) : new Date(),
             }
         });
 
-        // Also Log this action in Audit Logs (Simple implementation)
+        // 3. Investor Notifications & Payment Status Logic
+        if (targetUserId && type === 'PAYMENT') {
+            // Get user's investment to calculate monthly requirement
+            const investment = await prisma.investment.findFirst({
+                where: { userId: targetUserId, status: 'ACTIVE' }
+            });
+
+            if (investment) {
+                const monthlyRequired = investment.amount / 60;
+                let message = "";
+
+                if (parseFloat(amount) >= monthlyRequired) {
+                    message = "You are on good progress, continue.";
+                } else {
+                    message = "You are falling behind on your payment schedule.";
+                }
+
+                // Create notification for the investor
+                await prisma.notification.create({
+                    data: {
+                        userId: targetUserId,
+                        message: message,
+                        isRead: false
+                    }
+                });
+            }
+        }
+
+        // Also Log this action in Audit Logs
         await prisma.auditLog.create({
             data: {
                 action: 'CREATE_TRANSACTION',
-                details: `Created transaction of ${amount} for user ${userId}`,
-                userId: user.id
+                details: `Created transaction of ${amount} for user ${targetUserId}`,
+                userId: auth.id
             }
         });
 

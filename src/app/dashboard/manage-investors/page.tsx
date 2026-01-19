@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft, TrendingUp, DollarSign, Calendar, Save, Bell, Send } from 'lucide-react';
+import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft, TrendingUp, DollarSign, Calendar, Save, Bell, Send, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ManageInvestors() {
@@ -468,54 +468,66 @@ export default function ManageInvestors() {
                             {/* Left: Add/Edit */}
                             <div className="lg:col-span-1 bg-slate-50 dark:bg-[#0d1117] p-6 rounded-2xl border border-slate-200 dark:border-white/5 overflow-y-auto">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                        {editingInvestment ? <Edit2 className="w-4 h-4 text-orange-400" /> : <Plus className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-                                        {editingInvestment ? 'Update Asset' : 'Allocate Asset'}
+                                    <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                                        <DollarSign className="w-5 h-5 text-green-500" />
+                                        Investment Configuration
                                     </h3>
                                     {editingInvestment && (
-                                        <button onClick={resetInvestmentForm} className="text-[10px] text-slate-500 hover:text-white underline">Cancel Edit</button>
+                                        <button onClick={resetInvestmentForm} className="text-[10px] text-slate-500 hover:text-white underline font-bold uppercase tracking-wider">Cancel Edit</button>
                                     )}
                                 </div>
-                                <form onSubmit={handleSaveInvestment} className="space-y-3">
+                                <form onSubmit={handleSaveInvestment} className="space-y-4">
                                     <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asset Name</label>
-                                        <input type="text" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
-                                            value={investmentForm.title} onChange={e => setInvestmentForm({ ...investmentForm, title: e.target.value })} required placeholder="e.g. Tech Growth Fund" />
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Investment Name</label>
+                                        <input type="text" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                                            value={investmentForm.title} onChange={e => setInvestmentForm({ ...investmentForm, title: e.target.value })} required placeholder="e.g. Strategic Growth Plan" />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Principal ($)</label>
-                                        <input type="number" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
-                                            value={investmentForm.amount} onChange={e => setInvestmentForm({ ...investmentForm, amount: e.target.value })} required placeholder="0.00" />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Target ROI (%)</label>
-                                        <input type="number" step="0.1" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
-                                            value={investmentForm.roi} onChange={e => setInvestmentForm({ ...investmentForm, roi: e.target.value })} placeholder="0.0" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Start Date</label>
-                                            <input type="date" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
-                                                value={investmentForm.startDate} onChange={e => setInvestmentForm({ ...investmentForm, startDate: e.target.value })} />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Maturity</label>
-                                            <input type="date" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
-                                                value={investmentForm.maturityDate} onChange={e => setInvestmentForm({ ...investmentForm, maturityDate: e.target.value })} />
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Total Principal Amount</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                            <input type="number" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-xl p-3 pl-7 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                                                value={investmentForm.amount} onChange={e => setInvestmentForm({ ...investmentForm, amount: e.target.value })} required placeholder="0.00" />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</label>
-                                        <select className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
-                                            value={investmentForm.status} onChange={e => setInvestmentForm({ ...investmentForm, status: e.target.value })}>
-                                            <option value="PENDING">Pending</option>
-                                            <option value="ACTIVE">Active</option>
-                                            <option value="MATURED">Matured</option>
-                                            <option value="CLOSED">Closed</option>
-                                        </select>
+                                    {investmentForm.amount && (
+                                        <div className="bg-blue-600/5 border border-blue-500/20 p-4 rounded-xl">
+                                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1.5">Auto-Calculated Monthly Payment</p>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-xl font-bold text-slate-900 dark:text-white">
+                                                    ${(parseFloat(investmentForm.amount) / 60).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </span>
+                                                <span className="text-xs text-slate-500 font-medium">/ month</span>
+                                            </div>
+                                            <p className="text-[9px] text-slate-400 mt-2 font-medium italic">* Based on a mandatory 5-year (60 months) timeline.</p>
+                                        </div>
+                                    )}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Start Date</label>
+                                            <input type="date" className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                                                value={investmentForm.startDate} onChange={e => {
+                                                    const start = e.target.value;
+                                                    const maturity = new Date(start);
+                                                    maturity.setFullYear(maturity.getFullYear() + 5);
+                                                    setInvestmentForm({ ...investmentForm, startDate: start, maturityDate: maturity.toISOString().split('T')[0] });
+                                                }} />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Maturity (5Y)</label>
+                                            <input type="date" disabled className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                                                value={investmentForm.maturityDate} />
+                                        </div>
                                     </div>
-                                    <button className={`w-full font-bold py-3 rounded-lg text-sm transition-colors mt-2 ${editingInvestment ? 'bg-orange-600 hover:bg-orange-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}>
-                                        {editingInvestment ? 'Update Asset' : 'Allocate'}
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Asset Category</label>
+                                        <div className="flex items-center gap-2 p-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl">
+                                            <Wallet className="w-4 h-4 text-slate-400" />
+                                            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Cash Deposit Only</span>
+                                        </div>
+                                    </div>
+                                    <button className={`w-full font-bold py-4 rounded-xl text-sm transition-all mt-2 shadow-lg ${editingInvestment ? 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/20' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20'}`}>
+                                        {editingInvestment ? 'Update Configuration' : 'Establish Portfolio'}
                                     </button>
                                 </form>
                             </div>
