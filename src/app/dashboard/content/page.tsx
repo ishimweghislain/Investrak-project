@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Upload, Plus, Trash2, Edit2, Loader2, Image as ImageIcon, Layout, Users, MessageSquare, Briefcase, Info, Phone } from 'lucide-react';
+import { Save, Upload, Plus, Trash2, Edit2, Loader2, Image as ImageIcon, Layout, Users, MessageSquare, Briefcase, Info, Phone, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ContentManager() {
@@ -11,7 +11,9 @@ export default function ContentManager() {
     const [settings, setSettings] = useState<any>({});
     const [services, setServices] = useState<any[]>([]);
     const [team, setTeam] = useState<any[]>([]);
+
     const [testimonials, setTestimonials] = useState<any[]>([]);
+    const [messages, setMessages] = useState<any[]>([]);
 
     // Load Data
     useEffect(() => {
@@ -21,17 +23,19 @@ export default function ContentManager() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [paramsRes, servRes, teamRes, testRes] = await Promise.all([
+            const [paramsRes, servRes, teamRes, testRes, msgRes] = await Promise.all([
                 fetch('/api/admin/settings'),
                 fetch('/api/admin/services'),
                 fetch('/api/admin/team'),
-                fetch('/api/admin/testimonials')
+                fetch('/api/admin/testimonials'),
+                fetch('/api/contact')
             ]);
 
             if (paramsRes.ok) setSettings(await paramsRes.json());
             if (servRes.ok) setServices(await servRes.json());
             if (teamRes.ok) setTeam(await teamRes.json());
             if (testRes.ok) setTestimonials(await testRes.json());
+            if (msgRes.ok) setMessages(await msgRes.json());
 
         } catch (e) {
             toast.error('Failed to load content data');
@@ -137,6 +141,7 @@ export default function ContentManager() {
         { id: 'team', label: 'Team', icon: Users },
         { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
         { id: 'contact', label: 'Contact', icon: Phone },
+        { id: 'messages', label: 'Messages', icon: Mail },
     ];
 
     return (
@@ -266,10 +271,41 @@ export default function ContentManager() {
                                 data={activeTab === 'services' ? services : activeTab === 'team' ? team : testimonials}
                                 setData={activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials}
                                 onUpload={handleUpload}
-                                onCreate={(d, l) => handleCreate(activeTab, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
-                                onUpdate={(id, d, l) => handleUpdate(activeTab, id, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
-                                onDelete={(id, l) => handleDelete(activeTab, id, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
+                                onCreate={(d: any, l: any) => handleCreate(activeTab, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
+                                onUpdate={(id: any, d: any, l: any) => handleUpdate(activeTab, id, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
+                                onDelete={(id: any, l: any) => handleDelete(activeTab, id, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
                             />
+                        )}
+
+                        {activeTab === 'messages' && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                                <div className="bg-white dark:bg-[#161b22] p-8 rounded-[32px] border border-slate-200 dark:border-white/5 shadow-xl">
+                                    <h2 className="text-xl font-bold mb-6">Received Messages</h2>
+                                    {messages.length === 0 ? (
+                                        <p className="text-slate-500">No messages yet.</p>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {messages.map((msg: any) => (
+                                                <div key={msg.id} className="p-6 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:shadow-md transition-shadow">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div className="flex flex-col">
+                                                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">{msg.name}</h3>
+                                                            <span className="text-xs text-slate-500">{new Date(msg.createdAt).toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <a href={`mailto:${msg.email}`} className="text-blue-600 hover:text-blue-500 text-sm font-medium">{msg.email}</a>
+                                                        </div>
+                                                    </div>
+                                                    {msg.phone && <p className="text-sm text-slate-500 mb-2">Phone: {msg.phone}</p>}
+                                                    <div className="mt-4 p-4 bg-white dark:bg-black/20 rounded-xl text-slate-700 dark:text-slate-300">
+                                                        {msg.message}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>

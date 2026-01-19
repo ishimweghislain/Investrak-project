@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import LoginForm from '@/components/LoginForm';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 export default function LandingPageClient({ settings, services, team, testimonials }: any) {
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -271,14 +272,40 @@ export default function LandingPageClient({ settings, services, team, testimonia
 
                     <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-sm">
                         <h3 className="text-xl font-bold mb-6">Send a Message</h3>
-                        <form className="space-y-4">
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.currentTarget);
+                            const name = formData.get('name');
+                            const phone = formData.get('phone');
+                            const email = formData.get('email');
+                            const message = formData.get('message');
+
+                            const toastId = toast.loading('Sending message...');
+
+                            try {
+                                const res = await fetch('/api/contact', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ name, phone, email, message })
+                                });
+
+                                if (res.ok) {
+                                    toast.success('Message sent successfully!', { id: toastId });
+                                    (e.target as HTMLFormElement).reset();
+                                } else {
+                                    toast.error('Failed to send message.', { id: toastId });
+                                }
+                            } catch (err) {
+                                toast.error('Something went wrong.', { id: toastId });
+                            }
+                        }} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <input className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full" placeholder="Full Name" />
-                                <input className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full" placeholder="Phone Number" />
+                                <input name="name" required className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full text-white" placeholder="Full Name" />
+                                <input name="phone" className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full text-white" placeholder="Phone Number" />
                             </div>
-                            <input className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full" placeholder="Email Address" />
-                            <textarea className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full min-h-[120px]" placeholder="How can we help?" />
-                            <button className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-4 rounded-xl transition-colors">Submit Request</button>
+                            <input name="email" required type="email" className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full text-white" placeholder="Email Address" />
+                            <textarea name="message" required className="bg-white/10 border-transparent focus:bg-white/20 p-3 rounded-lg placeholder-white/50 outline-none w-full min-h-[120px] text-white" placeholder="How can we help?" />
+                            <button type="submit" className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-4 rounded-xl transition-colors">Submit Request</button>
                         </form>
                     </div>
                 </div>
