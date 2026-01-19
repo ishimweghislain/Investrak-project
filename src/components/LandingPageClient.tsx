@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
     BarChart3, Shield, CheckCircle, TrendingUp, Users,
     FileText, ArrowRight, Lock, Globe, Mail, MapPin,
@@ -47,7 +48,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         <div className="flex items-center gap-3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-blue-600/20 blur-xl rounded-full group-hover:bg-blue-600/30 transition-all"></div>
-                                <img src={logoSrc} alt="Logo" className="relative h-12 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300" />
+                                <Image src={logoSrc} alt="Logo" width={48} height={48} className="relative h-12 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300" unoptimized />
                             </div>
                             <div className="hidden lg:block">
                                 <div className="text-sm font-black tracking-tight text-slate-900 dark:text-white">{heroTitle.split(' ')[0]}</div>
@@ -131,7 +132,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
             {/* Hero Section */}
             <section className="relative pt-20 pb-24 overflow-hidden flex items-center justify-center min-h-[100vh]">
                 <div className="absolute inset-0 z-0 select-none">
-                    <img src={heroBg} alt="Background" className="w-full h-full object-cover scale-105 animate-[pulse_10s_ease-in-out_infinite]" />
+                    <Image src={heroBg} alt="Background" fill className="object-cover scale-105 animate-[pulse_10s_ease-in-out_infinite]" priority unoptimized />
                     <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
                 </div>
@@ -319,7 +320,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
                                         <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-slate-200 dark:border-slate-700 group-hover:border-blue-500 transition-all duration-300 shadow-xl">
                                             {t.photoUrl ? (
-                                                <img src={t.photoUrl} alt={t.name || "Team member"} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500" />
+                                                <Image src={t.photoUrl} alt={t.name || "Team member"} fill className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500" unoptimized />
                                             ) : (
                                                 <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center">
                                                     <Users className="w-12 h-12 text-slate-400" />
@@ -360,11 +361,11 @@ export default function LandingPageClient({ settings, services, team, testimonia
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                                     <div className="relative">
-                                        <div className="absolute -top-1 -left-1 text-5xl text-blue-600/20 font-black">"</div>
+                                        <div className="absolute -top-1 -left-1 text-5xl text-blue-600/20 font-black">&quot;</div>
 
                                         <div className="flex items-center gap-3 mb-4 relative z-10">
                                             {t.imageUrl ? (
-                                                <img src={t.imageUrl} alt={t.clientName || "Client"} className="w-12 h-12 rounded-full object-cover border-2 border-blue-500/30 shadow-lg" />
+                                                <Image src={t.imageUrl} alt={t.clientName || "Client"} width={48} height={48} className="w-12 h-12 rounded-full object-cover border-2 border-blue-500/30 shadow-lg" unoptimized />
                                             ) : (
                                                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm">
                                                     {t.clientName?.charAt(0) || 'C'}
@@ -408,7 +409,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                             Get In Touch
                         </div>
                         <h2 className="text-3xl md:text-4xl font-black mb-3 tracking-tight">Contact Us</h2>
-                        <p className="text-base text-blue-200">We're here to help you achieve your financial goals</p>
+                        <p className="text-base text-blue-200">We&apos;re here to help you achieve your financial goals</p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-8">
@@ -440,7 +441,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
 
                             <div className="relative">
                                 <h3 className="text-xl font-black mb-2">Send a Message</h3>
-                                <p className="text-sm text-blue-200 mb-6 pb-4 border-b border-white/10">We'll get back to you within 24 hours</p>
+                                <p className="text-sm text-blue-200 mb-6 pb-4 border-b border-white/10">We&apos;ll get back to you within 24 hours</p>
 
                                 <form onSubmit={async (e) => {
                                     e.preventDefault();
@@ -514,7 +515,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-3">
-                            <img src={logoSrc} alt="Logo" className="h-8 w-auto object-contain opacity-50" />
+                            <Image src={logoSrc} alt="Logo" width={32} height={32} className="h-8 w-auto object-contain opacity-50" unoptimized />
                             <div className="h-6 w-px bg-slate-700"></div>
                             <p>&copy; {new Date().getFullYear()} {heroTitle}. All rights reserved.</p>
                         </div>

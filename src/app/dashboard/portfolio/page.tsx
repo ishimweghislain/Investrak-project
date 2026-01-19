@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Loader2, PieChart, ArrowUpRight, Wallet, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -12,11 +12,7 @@ export default function PortfolioPage() {
     });
     const router = useRouter();
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         const token = localStorage.getItem('token');
         if (!token) {
             router.push('/');
@@ -36,7 +32,11 @@ export default function PortfolioPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const calculateStats = (investments: any[]) => {
         const totalEquity = investments.reduce((sum, inv) => sum + (inv.amount || 0), 0);

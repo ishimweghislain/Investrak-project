@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import LandingPageClient from '@/components/LandingPageClient';
 import { MessageSquare } from 'lucide-react';
+import Image from 'next/image';
 
 export const revalidate = 0;
 
@@ -36,7 +37,7 @@ export default async function TestimonialsPage() {
                     {testimonials.length > 0 ? testimonials.map((t: any) => (
                         <div key={t.id} className="bg-white dark:bg-[#161b22] p-8 rounded-[32px] border border-slate-200 dark:border-white/5 hover:shadow-xl transition-all">
                             <div className="flex items-center gap-4 mb-6">
-                                {t.imageUrl ? <img src={t.imageUrl} alt={t.clientName || "Client"} className="w-14 h-14 rounded-full object-cover" /> : <div className="w-14 h-14 bg-slate-100 rounded-full"></div>}
+                                {t.imageUrl ? <Image src={t.imageUrl} alt={t.clientName || "Client"} width={56} height={56} className="w-14 h-14 rounded-full object-cover" unoptimized /> : <div className="w-14 h-14 bg-slate-100 rounded-full"></div>}
                                 <div>
                                     <h4 className="font-bold text-lg">{t.clientName}</h4>
                                     <span className="text-xs text-slate-500">Verified Client</span>

@@ -46,6 +46,7 @@ export default function ManageInvestors() {
 
     useEffect(() => {
         fetchInvestors();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchInvestors = async () => {
@@ -88,8 +89,6 @@ export default function ManageInvestors() {
                 },
                 body: JSON.stringify(formData)
             });
-
-
 
             const data = await response.json();
 
@@ -331,7 +330,6 @@ export default function ManageInvestors() {
             username: investor.username,
             company: investor.company || '',
             email: investor.email || '',
-            email: investor.email || '',
             password: '',
             profileImage: investor.profileImage || ''
         });
@@ -354,8 +352,6 @@ export default function ManageInvestors() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-slate-100 p-4 md:p-8 relative overflow-hidden pb-32 transition-colors">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-
-
 
             <div className="max-w-7xl mx-auto relative z-10">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
@@ -381,7 +377,7 @@ export default function ManageInvestors() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {investors.map((investor) => (
                         <div key={investor.id} className="bg-white dark:bg-[#161b22]/40 border border-slate-200 dark:border-white/5 p-5 rounded-[24px] backdrop-blur-xl hover:shadow-xl dark:hover:bg-[#1c2128]/60 transition-all group relative overflow-hidden flex flex-col h-full shadow-sm">
-                            <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
+                            <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5 z-10">
                                 <button
                                     onClick={() => openEditModal(investor)}
                                     className="p-1.5 bg-blue-600/10 hover:bg-blue-600/20 rounded-lg text-blue-400 transition-colors"
@@ -397,9 +393,15 @@ export default function ManageInvestors() {
                             </div>
 
                             <div className="mb-4">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-600/20 to-slate-600/20 rounded-xl flex items-center justify-center mb-3 border border-white/5">
-                                    <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                                </div>
+                                {investor.profileImage ? (
+                                    <div className="w-12 h-12 rounded-xl mb-3 border border-slate-200 dark:border-white/10 overflow-hidden relative">
+                                        <img src={investor.profileImage} alt={investor.username} className="w-full h-full object-cover" />
+                                    </div>
+                                ) : (
+                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600/20 to-slate-600/20 rounded-xl flex items-center justify-center mb-3 border border-white/5">
+                                        <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                )}
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate pr-12">{investor.username}</h3>
                                 <div className="flex items-center gap-1.5 text-slate-400 text-[10px] mt-0.5 font-bold uppercase tracking-wider">
                                     <Shield className="w-2.5 h-2.5" />
@@ -629,6 +631,11 @@ export default function ManageInvestors() {
                     </div>
                 </div>
             )}
+            <style jsx global>{`
+                input, select {
+                     @apply w-full bg-white dark:bg-[#1c2128] border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm transition-all focus:border-blue-500 dark:focus:border-blue-500 shadow-sm;
+                }
+            `}</style>
         </div>
     );
 }

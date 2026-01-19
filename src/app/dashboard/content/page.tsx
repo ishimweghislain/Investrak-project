@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Upload, Plus, Trash2, Edit2, Loader2, Image as ImageIcon, Layout, Users, MessageSquare, Briefcase, Info, Phone, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 export default function ContentManager() {
     const [activeTab, setActiveTab] = useState('home');
@@ -16,10 +17,6 @@ export default function ContentManager() {
     const [messages, setMessages] = useState<any[]>([]);
 
     // Load Data
-    useEffect(() => {
-        fetchData();
-    }, []);
-
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -43,6 +40,13 @@ export default function ContentManager() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
 
     // Generic Settings Update
     const updateSetting = (key: string, value: string) => {
@@ -184,7 +188,7 @@ export default function ContentManager() {
                                             <div className="flex flex-col md:flex-row items-center gap-6 mt-2">
                                                 {settings.home_bg && (
                                                     <div className="relative group">
-                                                        <img src={settings.home_bg} alt="bg" className="w-48 h-28 object-cover rounded-xl border-2 border-slate-200 dark:border-slate-700" />
+                                                        <Image src={settings.home_bg} alt="bg" width={192} height={112} className="w-48 h-28 object-cover rounded-xl border-2 border-slate-200 dark:border-slate-700" unoptimized />
                                                         <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">Current BG</div>
                                                     </div>
                                                 )}
@@ -202,7 +206,7 @@ export default function ContentManager() {
                                         <div>
                                             <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Logo</label>
                                             <div className="flex items-center gap-4">
-                                                {settings.home_logo && <img src={settings.home_logo} alt="logo" className="w-16 h-16 object-contain rounded-lg bg-slate-800" />}
+                                                {settings.home_logo && <Image src={settings.home_logo} alt="logo" width={64} height={64} className="w-16 h-16 object-contain rounded-lg bg-slate-800" unoptimized />}
                                                 <label className="btn-secondary cursor-pointer">
                                                     <Upload className="w-4 h-4 mr-2" /> Upload Logo
                                                     <input type="file" className="hidden" onChange={async (e) => {
@@ -313,13 +317,13 @@ export default function ContentManager() {
 
             <style jsx global>{`
                 .input-field {
-                    @apply w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white text-sm transition-all focus:bg-white dark:focus:bg-[#161b22];
+                    @apply w-full bg-white dark:bg-[#1c2128] border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm transition-all focus:border-blue-500 dark:focus:border-blue-500 shadow-sm;
                 }
                 .btn-primary {
                     @apply flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 text-sm active:scale-95;
                 }
                 .btn-secondary {
-                    @apply flex items-center justify-center px-4 py-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold rounded-xl transition-all text-xs active:scale-95 border border-transparent hover:border-slate-300 dark:hover:border-white/20;
+                    @apply flex items-center justify-center px-4 py-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold rounded-xl transition-all text-xs active:scale-95 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20;
                 }
             `}</style>
         </div>
@@ -363,7 +367,7 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                     <div key={item.id} className="bg-white dark:bg-[#161b22] p-6 rounded-2xl border border-slate-200 dark:border-white/5 flex justify-between items-start group">
                         <div className="flex gap-4">
                             {(item.photoUrl || item.imageUrl) && (
-                                <img src={item.photoUrl || item.imageUrl} className="w-12 h-12 rounded-full object-cover bg-slate-800" />
+                                <Image src={item.photoUrl || item.imageUrl} alt="Item" width={48} height={48} className="w-12 h-12 rounded-full object-cover bg-slate-800" unoptimized />
                             )}
                             <div>
                                 <h3 className="font-bold text-slate-900 dark:text-white">{item.title || item.name || item.clientName}</h3>
@@ -393,7 +397,7 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                             {type === 'team' && (
                                 <>
                                     <div className="flex items-center gap-4">
-                                        {form.photoUrl && <img src={form.photoUrl} className="w-16 h-16 rounded-full object-cover" />}
+                                        {form.photoUrl && <Image src={form.photoUrl} alt="Preview" width={64} height={64} className="w-16 h-16 rounded-full object-cover" unoptimized />}
                                         <label className="btn-secondary cursor-pointer">
                                             <Upload className="w-4 h-4 mr-2" /> Upload Photo
                                             <input type="file" className="hidden" onChange={async (e) => {
@@ -412,7 +416,7 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                             {type === 'testimonials' && (
                                 <>
                                     <div className="flex items-center gap-4">
-                                        {form.imageUrl && <img src={form.imageUrl} className="w-16 h-16 rounded-full object-cover" />}
+                                        {form.imageUrl && <Image src={form.imageUrl} alt="Preview" width={64} height={64} className="w-16 h-16 rounded-full object-cover" unoptimized />}
                                         <label className="btn-secondary cursor-pointer">
                                             <Upload className="w-4 h-4 mr-2" /> Upload Photo
                                             <input type="file" className="hidden" onChange={async (e) => {

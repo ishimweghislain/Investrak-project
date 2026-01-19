@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useTheme } from '@/components/ThemeProvider';
 
+import Image from 'next/image';
+
 export default function Sidebar() {
     const pathname = usePathname();
     const [user, setUser] = useState<any>(null);
@@ -80,7 +82,7 @@ export default function Sidebar() {
                     {user && (
                         <div className="flex items-center gap-3 px-2 py-2 mb-2">
                             {user.profileImage ? (
-                                <img src={user.profileImage} alt={user.username} className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-white/10" />
+                                <Image src={user.profileImage} alt={user.username} width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-white/10" unoptimized />
                             ) : (
                                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
                                     {user.username?.charAt(0).toUpperCase()}
