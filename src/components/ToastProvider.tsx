@@ -8,7 +8,7 @@ export default function ToastProvider() {
             position="top-right"
             toastOptions={{
                 style: {
-                    zIndex: 99999,
+                    zIndex: 999999,
                     background: '#0f141c',
                     color: '#fff',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -21,7 +21,7 @@ export default function ToastProvider() {
                 },
             }}
             containerStyle={{
-                zIndex: 99999,
+                zIndex: 999999,
                 top: 20,
             }}
         />
