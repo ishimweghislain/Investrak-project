@@ -38,8 +38,6 @@ export default function LoginForm() {
 
     return (
         <form onSubmit={handleLogin} className="p-6">
-
-            <h2 className="text-xl font-bold dark:text-white text-slate-900 mb-4">Sign In</h2>
             <div className="space-y-4">
                 <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Username</label>

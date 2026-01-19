@@ -87,6 +87,24 @@ export default function Dashboard() {
 
                     {/* Card 3 */}
                     {isAdmin && (
+                        <Link href="/dashboard/content"
+                            className="group bg-white dark:bg-[#161b22] p-6 rounded-[24px] border border-slate-200 dark:border-white/5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
+                            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-600/10 rounded-xl flex items-center justify-center mb-4 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
+                                <FileText className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold dark:text-white text-slate-900 mb-2">
+                                Manage Site Content
+                            </h3>
+                            <p className="text-slate-500 text-sm mb-4">
+                                Edit public facing pages.
+                            </p>
+                            <div className="flex items-center text-orange-600 dark:text-orange-400 font-bold text-sm">
+                                Edit Content <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </Link>
+                    )}
+
+                    {isAdmin && (
                         <Link href="/dashboard/audit-logs"
                             className="group bg-white dark:bg-[#161b22] p-6 rounded-[24px] border border-slate-200 dark:border-white/5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
                             <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700/30 rounded-xl flex items-center justify-center mb-4 text-slate-600 dark:text-slate-300 group-hover:scale-110 transition-transform">

@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
                 password: hashedPassword,
                 email,
                 company,
+                profileImage: body.profileImage || null,
                 role: 'INVESTOR'
             }
         });
@@ -84,9 +85,9 @@ export async function PUT(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { id, username, email, company, password } = body;
+        const { id, username, email, company, password, profileImage } = body;
 
-        const dataToUpdate: any = { username, email, company };
+        const dataToUpdate: any = { username, email, company, profileImage };
 
         if (password) {
             const bcrypt = await import('bcryptjs');

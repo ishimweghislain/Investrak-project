@@ -16,10 +16,12 @@ export default function ManageInvestors() {
     // Investor Form Data
     const [formData, setFormData] = useState({
         username: '',
-        company: '',
         password: '',
-        email: ''
+        email: '',
+        profileImage: ''
     });
+
+    const [fileUploading, setFileUploading] = useState(false);
 
     // Investment Form Data & State
     const [userInvestments, setUserInvestments] = useState<any[]>([]);
@@ -85,6 +87,8 @@ export default function ManageInvestors() {
                 body: JSON.stringify(formData)
             });
 
+
+
             const data = await response.json();
 
             if (response.ok) {
@@ -99,6 +103,33 @@ export default function ManageInvestors() {
             toast.error('Network error');
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+        setFileUploading(true);
+        const file = e.target.files[0];
+        const data = new FormData();
+        data.append('file', file);
+
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: data
+            });
+            if (res.ok) {
+                const json = await res.json();
+                setFormData(prev => ({ ...prev, profileImage: json.url }));
+                toast.success('Image uploaded');
+            } else {
+                toast.error('Upload failed');
+            }
+        } catch (e) {
+            toast.error('Upload network error');
+        } finally {
+            setFileUploading(false);
         }
     };
 
@@ -288,7 +319,7 @@ export default function ManageInvestors() {
     };
 
     const resetForm = () => {
-        setFormData({ username: '', company: '', password: '', email: '' });
+        setFormData({ username: '', company: '', password: '', email: '', profileImage: '' });
         setSelectedInvestor(null);
     };
 
@@ -298,7 +329,9 @@ export default function ManageInvestors() {
             username: investor.username,
             company: investor.company || '',
             email: investor.email || '',
-            password: ''
+            email: investor.email || '',
+            password: '',
+            profileImage: investor.profileImage || ''
         });
         setIsEditing(true);
     };
@@ -552,6 +585,18 @@ export default function ManageInvestors() {
                                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Email</label>
                                 <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-900 dark:text-white text-sm" placeholder="Email (Optional)" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Profile Image</label>
+                                <div className="flex items-center gap-4">
+                                    {formData.profileImage && (
+                                        <img src={formData.profileImage} alt="Preview" className="w-12 h-12 rounded-full object-cover border border-white/10" />
+                                    )}
+                                    <label className="cursor-pointer bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/5 px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                                        {fileUploading ? 'Uploading...' : 'Choose File'}
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                                    </label>
+                                </div>
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Secret Key</label>
