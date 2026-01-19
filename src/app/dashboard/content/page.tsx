@@ -197,7 +197,7 @@ export default function ContentManager() {
                                     <div className="hidden md:block flex-1 text-left">
                                         <div className="flex items-center justify-between w-full">
                                             <div className="font-bold text-sm leading-tight">{tab.label}</div>
-                                            {tab.count > 0 && (
+                                            {(tab.count ?? 0) > 0 && (
                                                 <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                                                     {tab.count}
                                                 </span>
