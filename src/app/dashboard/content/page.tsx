@@ -1,8 +1,7 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Upload, Plus, Trash2, Edit2, Loader2, Image as ImageIcon, Layout, Users, MessageSquare, Briefcase, Info, Phone, Mail } from 'lucide-react';
+import { Save, Upload, Plus, Trash2, Edit2, Loader2, Layout, Users, MessageSquare, Briefcase, Info, Phone, Mail, ChevronRight, Globe, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -16,7 +15,9 @@ export default function ContentManager() {
     const [testimonials, setTestimonials] = useState<any[]>([]);
     const [messages, setMessages] = useState<any[]>([]);
 
-    // Load Data
+    // Reload Trigger
+    const [refreshKey, setRefreshKey] = useState(0);
+
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -44,9 +45,7 @@ export default function ContentManager() {
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-
+    }, [refreshKey]);
 
     // Generic Settings Update
     const updateSetting = (key: string, value: string) => {
@@ -54,21 +53,23 @@ export default function ContentManager() {
     };
 
     const saveSettings = async () => {
+        const toastId = toast.loading('Saving...');
         try {
             const res = await fetch('/api/admin/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(settings)
             });
-            if (res.ok) toast.success('Settings saved');
-            else toast.error('Failed to save settings');
+            if (res.ok) toast.success('Settings saved', { id: toastId });
+            else toast.error('Failed to save settings', { id: toastId });
         } catch (e) {
-            toast.error('Network Error');
+            toast.error('Network Error', { id: toastId });
         }
     };
 
     // File Upload Helper
     const handleUpload = async (file: File): Promise<string | null> => {
+        const toastId = toast.loading('Uploading...');
         const formData = new FormData();
         formData.append('file', file);
         try {
@@ -79,11 +80,13 @@ export default function ContentManager() {
             });
             if (res.ok) {
                 const data = await res.json();
+                toast.dismiss(toastId);
                 return data.url;
             }
         } catch (e) {
             console.error(e);
         }
+        toast.error('Upload failed', { id: toastId });
         return null;
     };
 
@@ -136,79 +139,116 @@ export default function ContentManager() {
         } catch (e) { toast.error('Error deleting item'); }
     };
 
-    if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
+    if (loading) return <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>;
 
     const tabs = [
-        { id: 'home', label: 'Home Page', icon: Layout },
-        { id: 'about', label: 'About Us', icon: Info },
-        { id: 'services', label: 'Services', icon: Briefcase },
-        { id: 'team', label: 'Team', icon: Users },
-        { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
-        { id: 'contact', label: 'Contact', icon: Phone },
-        { id: 'messages', label: 'Messages', icon: Mail },
+        { id: 'home', label: 'Hero Section', icon: Layout, desc: 'Manage main landing visuals' },
+        { id: 'about', label: 'Company Info', icon: Info, desc: 'Mission, Vision & Strategy' },
+        { id: 'services', label: 'Our Services', icon: Briefcase, desc: 'Manage service offerings' },
+        { id: 'team', label: 'Leadership', icon: Users, desc: 'Manage team members' },
+        { id: 'testimonials', label: 'Testimonials', icon: MessageSquare, desc: 'Client success stories' },
+        { id: 'contact', label: 'Contact Details', icon: Phone, desc: 'Address, Email & Phone' },
+        { id: 'messages', label: 'Inquiries', icon: Mail, desc: 'View received messages' },
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-slate-100 p-6 pb-32">
-            <div className="max-w-6xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8">Manage Site Content</h1>
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-slate-100 p-4 md:p-8 pb-32 transition-colors">
+            <div className="max-w-7xl mx-auto">
+                <div className="mb-10">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">Content Management</h1>
+                    <p className="text-slate-500 dark:text-slate-400">Control your website&apos;s public facing content.</p>
+                </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Sidebar Tabs */}
-                    <div className="w-full lg:w-64 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible">
-                        {tabs.map(tab => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white dark:bg-[#161b22] hover:bg-slate-100 dark:hover:bg-white/5'}`}
-                            >
-                                <tab.icon className="w-4 h-4" />
-                                {tab.label}
-                            </button>
-                        ))}
+                    <div className="w-full lg:w-72 flex-shrink-0">
+                        <div className="bg-white dark:bg-[#161b22] rounded-2xl p-2 shadow-sm border border-slate-200 dark:border-white/5 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible sticky top-8">
+                            {tabs.map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left group flex-shrink-0 lg:w-full ${activeTab === tab.id
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                >
+                                    <div className={`p-2 rounded-lg ${activeTab === tab.id ? 'bg-white/20' : 'bg-slate-100 dark:bg-white/5 group-hover:bg-white/10'}`}>
+                                        <tab.icon className="w-4 h-4" />
+                                    </div>
+                                    <div className="hidden md:block">
+                                        <div className="font-bold text-sm leading-tight">{tab.label}</div>
+                                        <div className={`text-[10px] mt-0.5 ${activeTab === tab.id ? 'text-blue-100' : 'text-slate-400'}`}>{tab.desc}</div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Content Area */}
                     <div className="flex-1 min-w-0">
-                        {activeTab === 'home' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                                <div className="bg-white dark:bg-[#161b22] p-8 rounded-[32px] border border-slate-200 dark:border-white/5 shadow-xl">
-                                    <h2 className="text-xl font-bold mb-4">Hero Section</h2>
-                                    <div className="space-y-4">
+                        <div className="bg-white dark:bg-[#161b22] min-h-[600px] rounded-[32px] border border-slate-200 dark:border-white/5 shadow-xl p-6 md:p-10 relative overflow-hidden">
+
+                            {/* Decorative Blur */}
+                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+
+                            {activeTab === 'home' && (
+                                <div className="space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-6">
                                         <div>
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Company Name</label>
-                                            <input type="text" className="input-field" value={settings.home_title || 'Spark Holding Group'} onChange={e => updateSetting('home_title', e.target.value)} />
+                                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Hero Configuration</h2>
+                                            <p className="text-slate-500 text-sm mt-1">Customize the main landing section.</p>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Tagline</label>
-                                            <textarea className="input-field min-h-[100px]" value={settings.home_subtitle || ''} onChange={e => updateSetting('home_subtitle', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Background Image</label>
-                                            <div className="flex flex-col md:flex-row items-center gap-6 mt-2">
-                                                {settings.home_bg && (
-                                                    <div className="relative group">
-                                                        <Image src={settings.home_bg} alt="bg" width={192} height={112} className="w-48 h-28 object-cover rounded-xl border-2 border-slate-200 dark:border-slate-700" unoptimized />
-                                                        <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">Current BG</div>
+                                        <button onClick={saveSettings} className="btn-primary"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div className="bg-slate-50 dark:bg-white/5 p-1 rounded-2xl border border-slate-200 dark:border-white/5">
+                                                {settings.home_bg ? (
+                                                    <div className="relative aspect-video rounded-xl overflow-hidden group">
+                                                        <Image src={settings.home_bg} alt="Hero BG" fill className="object-cover" unoptimized />
+                                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                            <span className="text-white font-bold text-sm">Background Preview</span>
+                                                        </div>
                                                     </div>
+                                                ) : (
+                                                    <div className="aspect-video bg-slate-200 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 text-sm">No Image</div>
                                                 )}
-                                                <label className="btn-secondary cursor-pointer">
-                                                    <Upload className="w-4 h-4 mr-2" /> Upload BG
-                                                    <input type="file" className="hidden" onChange={async (e) => {
-                                                        if (e.target.files?.[0]) {
-                                                            const url = await handleUpload(e.target.files[0]);
-                                                            if (url) updateSetting('home_bg', url);
-                                                        }
-                                                    }} />
-                                                </label>
                                             </div>
+                                            <label className="btn-secondary w-full cursor-pointer py-4">
+                                                <Upload className="w-4 h-4 mr-2" /> Change Background
+                                                <input type="file" className="hidden" onChange={async (e) => {
+                                                    if (e.target.files?.[0]) {
+                                                        const url = await handleUpload(e.target.files[0]);
+                                                        if (url) updateSetting('home_bg', url);
+                                                    }
+                                                }} />
+                                            </label>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Logo</label>
-                                            <div className="flex items-center gap-4">
-                                                {settings.home_logo && <Image src={settings.home_logo} alt="logo" width={64} height={64} className="w-16 h-16 object-contain rounded-lg bg-slate-800" unoptimized />}
-                                                <label className="btn-secondary cursor-pointer">
-                                                    <Upload className="w-4 h-4 mr-2" /> Upload Logo
+
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="label-text">Company Name (Hero Title)</label>
+                                                <input type="text" className="input-field font-bold text-lg" value={settings.home_title || ''} onChange={e => updateSetting('home_title', e.target.value)} placeholder="e.g. Spark Holding" />
+                                            </div>
+                                            <div>
+                                                <label className="label-text">Tagline / Subtitle</label>
+                                                <textarea className="input-field min-h-[120px] text-base" value={settings.home_subtitle || ''} onChange={e => updateSetting('home_subtitle', e.target.value)} placeholder="Enter a catchy tagline..." />
+                                            </div>
+                                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/5 flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    {settings.home_logo ? (
+                                                        <div className="w-16 h-16 bg-white dark:bg-black/20 rounded-lg p-2 flex items-center justify-center">
+                                                            <Image src={settings.home_logo} alt="Logo" width={48} height={48} className="object-contain" unoptimized />
+                                                        </div>
+                                                    ) : <div className="w-16 h-16 bg-slate-200 rounded-lg"></div>}
+                                                    <div>
+                                                        <div className="font-bold text-sm text-slate-900 dark:text-white">Brand Logo</div>
+                                                        <div className="text-xs text-slate-500">PNG, JPG recommended</div>
+                                                    </div>
+                                                </div>
+                                                <label className="btn-secondary cursor-pointer text-xs">
+                                                    <Upload className="w-3 h-3 mr-2" /> Upload
                                                     <input type="file" className="hidden" onChange={async (e) => {
                                                         if (e.target.files?.[0]) {
                                                             const url = await handleUpload(e.target.files[0]);
@@ -218,112 +258,148 @@ export default function ContentManager() {
                                                 </label>
                                             </div>
                                         </div>
-                                        <button onClick={saveSettings} className="btn-primary mt-4"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {activeTab === 'about' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                                <div className="bg-white dark:bg-[#161b22] p-6 rounded-2xl border border-slate-200 dark:border-white/5 space-y-6">
-                                    <div>
-                                        <h3 className="font-bold mb-2">Our Mission</h3>
-                                        <textarea className="input-field min-h-[100px]" value={settings.mission_text || ''} onChange={e => updateSetting('mission_text', e.target.value)} placeholder="Mission statement..." />
+                            {activeTab === 'about' && (
+                                <div className="space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-6">
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Company Information</h2>
+                                            <p className="text-slate-500 text-sm mt-1">Define your mission, vision, and strategy.</p>
+                                        </div>
+                                        <button onClick={saveSettings} className="btn-primary"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold mb-2">Our Vision</h3>
-                                        <textarea className="input-field min-h-[100px]" value={settings.vision_text || ''} onChange={e => updateSetting('vision_text', e.target.value)} placeholder="Vision statement..." />
+
+                                    <div className="space-y-6">
+                                        {[
+                                            { key: 'mission_text', label: 'Our Mission', placeholder: 'What drives your company?' },
+                                            { key: 'vision_text', label: 'Our Vision', placeholder: 'Where are you heading?' },
+                                            { key: 'strategy_text', label: 'Our Strategy', placeholder: 'How will you achieve your goals?' }
+                                        ].map(field => (
+                                            <div key={field.key} className="relative">
+                                                <label className="label-text mb-2 block">{field.label}</label>
+                                                <textarea
+                                                    className="input-field min-h-[140px] text-base leading-relaxed"
+                                                    value={settings[field.key] || ''}
+                                                    onChange={e => updateSetting(field.key, e.target.value)}
+                                                    placeholder={field.placeholder}
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold mb-2">Our Strategy</h3>
-                                        <textarea className="input-field min-h-[100px]" value={settings.strategy_text || ''} onChange={e => updateSetting('strategy_text', e.target.value)} placeholder="Strategy details..." />
-                                    </div>
-                                    <button onClick={saveSettings} className="btn-primary"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {activeTab === 'contact' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                                <div className="bg-white dark:bg-[#161b22] p-6 rounded-2xl border border-slate-200 dark:border-white/5 space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Address</label>
-                                        <input type="text" className="input-field" value={settings.contact_address || ''} onChange={e => updateSetting('contact_address', e.target.value)} />
+                            {activeTab === 'contact' && (
+                                <div className="space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-6">
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Contact Details</h2>
+                                            <p className="text-slate-500 text-sm mt-1">Where can people find you?</p>
+                                        </div>
+                                        <button onClick={saveSettings} className="btn-primary"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Email</label>
-                                        <input type="text" className="input-field" value={settings.contact_email || ''} onChange={e => updateSetting('contact_email', e.target.value)} />
+
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        {[
+                                            { key: 'contact_address', label: 'Physical Address', icon: MapPin },
+                                            { key: 'contact_email', label: 'Email Address', icon: Mail },
+                                            { key: 'contact_phone', label: 'Phone Number', icon: Phone },
+                                            { key: 'contact_website', label: 'Website URL', icon: Globe },
+                                        ].map(field => (
+                                            <div key={field.key}>
+                                                <label className="label-text flex items-center gap-2 mb-2">
+                                                    <field.icon className="w-3 h-3 opacity-50" /> {field.label}
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="input-field"
+                                                    value={settings[field.key] || ''}
+                                                    onChange={e => updateSetting(field.key, e.target.value)}
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Phone</label>
-                                        <input type="text" className="input-field" value={settings.contact_phone || ''} onChange={e => updateSetting('contact_phone', e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Website</label>
-                                        <input type="text" className="input-field" value={settings.contact_website || ''} onChange={e => updateSetting('contact_website', e.target.value)} />
-                                    </div>
-                                    <button onClick={saveSettings} className="btn-primary mt-4"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* List Managers */}
-                        {['services', 'team', 'testimonials'].includes(activeTab) && (
-                            <ListManager
-                                type={activeTab}
-                                data={activeTab === 'services' ? services : activeTab === 'team' ? team : testimonials}
-                                setData={activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials}
-                                onUpload={handleUpload}
-                                onCreate={(d: any, l: any) => handleCreate(activeTab, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
-                                onUpdate={(id: any, d: any, l: any) => handleUpdate(activeTab, id, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
-                                onDelete={(id: any, l: any) => handleDelete(activeTab, id, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
-                            />
-                        )}
+                            {/* List Managers */}
+                            {['services', 'team', 'testimonials'].includes(activeTab) && (
+                                <ListManager
+                                    type={activeTab}
+                                    data={activeTab === 'services' ? services : activeTab === 'team' ? team : testimonials}
+                                    setData={activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials}
+                                    onUpload={handleUpload}
+                                    onCreate={(d: any, l: any) => handleCreate(activeTab, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
+                                    onUpdate={(id: any, d: any, l: any) => handleUpdate(activeTab, id, d, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
+                                    onDelete={(id: any, l: any) => handleDelete(activeTab, id, activeTab === 'services' ? setServices : activeTab === 'team' ? setTeam : setTestimonials, l)}
+                                />
+                            )}
 
-                        {activeTab === 'messages' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                                <div className="bg-white dark:bg-[#161b22] p-8 rounded-[32px] border border-slate-200 dark:border-white/5 shadow-xl">
-                                    <h2 className="text-xl font-bold mb-6">Received Messages</h2>
+                            {activeTab === 'messages' && (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 relative z-10">
+                                    <div className="border-b border-slate-100 dark:border-white/5 pb-6">
+                                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Inbox</h2>
+                                        <p className="text-slate-500 text-sm mt-1">Messages from your contact form.</p>
+                                    </div>
+
                                     {messages.length === 0 ? (
-                                        <p className="text-slate-500">No messages yet.</p>
+                                        <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10">
+                                            <div className="w-16 h-16 bg-slate-100 dark:bg-white/10 rounded-full flex items-center justify-center text-slate-400 mb-4">
+                                                <Mail className="w-8 h-8" />
+                                            </div>
+                                            <p className="text-slate-500 font-bold">No messages yet.</p>
+                                        </div>
                                     ) : (
                                         <div className="space-y-4">
                                             {messages.map((msg: any) => (
-                                                <div key={msg.id} className="p-6 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:shadow-md transition-shadow">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div className="flex flex-col">
-                                                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">{msg.name}</h3>
-                                                            <span className="text-xs text-slate-500">{new Date(msg.createdAt).toLocaleString()}</span>
+                                                <div key={msg.id} className="p-6 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:shadow-lg transition-all group">
+                                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+                                                                {msg.name.charAt(0).toUpperCase()}
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">{msg.name}</h3>
+                                                                <a href={`mailto:${msg.email}`} className="text-blue-600 hover:text-blue-500 text-sm font-medium">{msg.email}</a>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <a href={`mailto:${msg.email}`} className="text-blue-600 hover:text-blue-500 text-sm font-medium">{msg.email}</a>
-                                                        </div>
+                                                        <span className="text-xs font-medium text-slate-400 bg-white dark:bg-black/20 px-3 py-1 rounded-full border border-slate-100 dark:border-white/5">
+                                                            {new Date(msg.createdAt).toLocaleString()}
+                                                        </span>
                                                     </div>
-                                                    {msg.phone && <p className="text-sm text-slate-500 mb-2">Phone: {msg.phone}</p>}
-                                                    <div className="mt-4 p-4 bg-white dark:bg-black/20 rounded-xl text-slate-700 dark:text-slate-300">
-                                                        {msg.message}
+
+                                                    <div className="pl-[52px]">
+                                                        {msg.phone && <div className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2"><Phone className="w-3 h-3" /> {msg.phone}</div>}
+                                                        <div className="p-5 bg-white dark:bg-black/20 rounded-2xl text-slate-700 dark:text-slate-300 text-sm leading-relaxed border border-slate-100 dark:border-white/5">
+                                                            {msg.message}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
             <style jsx global>{`
                 .input-field {
-                    @apply w-full bg-white dark:bg-[#1c2128] border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm transition-all focus:border-blue-500 dark:focus:border-blue-500 shadow-sm;
+                    @apply w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm transition-all focus:border-blue-500 dark:focus:border-blue-500 shadow-sm focus:bg-white dark:focus:bg-[#0a0c10];
+                }
+                .label-text {
+                    @apply text-[11px] font-bold text-slate-500 uppercase tracking-widest;
                 }
                 .btn-primary {
                     @apply flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 text-sm active:scale-95;
                 }
                 .btn-secondary {
-                    @apply flex items-center justify-center px-4 py-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold rounded-xl transition-all text-xs active:scale-95 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20;
+                    @apply flex items-center justify-center px-4 py-3 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold rounded-xl transition-all text-xs active:scale-95 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-sm;
                 }
             `}</style>
         </div>
@@ -356,48 +432,61 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold capitalize">{type} List</h2>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white capitalize">{type} List</h2>
+                    <p className="text-slate-500 text-sm mt-1">Manage your {type} items.</p>
+                </div>
                 <button onClick={() => startEdit()} className="btn-primary"><Plus className="w-4 h-4 mr-2" /> Add New</button>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
                 {data.map((item: any) => (
-                    <div key={item.id} className="bg-white dark:bg-[#161b22] p-6 rounded-2xl border border-slate-200 dark:border-white/5 flex justify-between items-start group">
-                        <div className="flex gap-4">
-                            {(item.photoUrl || item.imageUrl) && (
-                                <Image src={item.photoUrl || item.imageUrl} alt="Item" width={48} height={48} className="w-12 h-12 rounded-full object-cover bg-slate-800" unoptimized />
-                            )}
-                            <div>
-                                <h3 className="font-bold text-slate-900 dark:text-white">{item.title || item.name || item.clientName}</h3>
-                                <p className="text-xs text-slate-500 line-clamp-2">{item.description || item.role}</p>
-                            </div>
+                    <div key={item.id} className="bg-slate-50 dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex gap-4 group hover:border-blue-500/30 transition-all relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 dark:bg-black/80 backdrop-blur rounded-bl-xl border-l border-b border-white/10">
+                            <button onClick={() => startEdit(item)} className="p-2 hover:bg-blue-500/20 text-blue-500 rounded-lg"><Edit2 className="w-4 h-4" /></button>
+                            <button onClick={() => onDelete(item.id, data)} className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                         </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => startEdit(item)} className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-lg"><Edit2 className="w-4 h-4" /></button>
-                            <button onClick={() => onDelete(item.id, data)} className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+
+                        <div className="flex-shrink-0">
+                            {(item.photoUrl || item.imageUrl) ? (
+                                <Image src={item.photoUrl || item.imageUrl} alt="Item" width={64} height={64} className="w-16 h-16 rounded-xl object-cover bg-slate-200 dark:bg-white/10" unoptimized />
+                            ) : (
+                                <div className="w-16 h-16 rounded-xl bg-slate-200 dark:bg-white/10 flex items-center justify-center">
+                                    <Layout className="w-6 h-6 text-slate-400" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="min-w-0 pr-12">
+                            <h3 className="font-bold text-slate-900 dark:text-white truncate text-lg">{item.title || item.name || item.clientName}</h3>
+                            <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">{item.role || (type === 'services' ? 'Service' : 'Client')}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.description}</p>
+                            {item.linkedinUrl && <p className="text-xs text-blue-500 mt-2 truncate">{item.linkedinUrl}</p>}
                         </div>
                     </div>
                 ))}
             </div>
 
             {isEditing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-[#161b22] w-full max-w-lg p-8 rounded-3xl border border-white/10 shadow-2xl relative">
-                        <h3 className="text-xl font-bold mb-6">{editingItem ? 'Edit Item' : 'New Item'}</h3>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+                    <div className="bg-white dark:bg-[#161b22] w-full max-w-lg p-8 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-purple-600"></div>
+                        <h3 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white">{editingItem ? 'Edit Item' : 'Create New Item'}</h3>
 
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             {type === 'services' && (
                                 <>
-                                    <input placeholder="Title" className="input-field" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} />
-                                    <textarea placeholder="Description" className="input-field min-h-[100px]" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} />
+                                    <div><label className="label-text mb-1 block">Title</label><input className="input-field" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+                                    <div><label className="label-text mb-1 block">Description</label><textarea className="input-field min-h-[100px]" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
                                 </>
                             )}
                             {type === 'team' && (
                                 <>
-                                    <div className="flex items-center gap-4">
-                                        {form.photoUrl && <Image src={form.photoUrl} alt="Preview" width={64} height={64} className="w-16 h-16 rounded-full object-cover" unoptimized />}
+                                    <div className="flex items-center gap-6 mb-4">
+                                        <div className="relative w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 flex-shrink-0">
+                                            {form.photoUrl && <Image src={form.photoUrl} alt="Preview" fill className="object-cover" unoptimized />}
+                                        </div>
                                         <label className="btn-secondary cursor-pointer">
                                             <Upload className="w-4 h-4 mr-2" /> Upload Photo
                                             <input type="file" className="hidden" onChange={async (e) => {
@@ -408,15 +497,17 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                                             }} />
                                         </label>
                                     </div>
-                                    <input placeholder="Name" className="input-field" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} />
-                                    <input placeholder="Role" className="input-field" value={form.role || ''} onChange={e => setForm({ ...form, role: e.target.value })} />
-                                    <input placeholder="LinkedIn URL" className="input-field" value={form.linkedinUrl || ''} onChange={e => setForm({ ...form, linkedinUrl: e.target.value })} />
+                                    <div><label className="label-text mb-1 block">Full Name</label><input className="input-field" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+                                    <div><label className="label-text mb-1 block">Role / Position</label><input className="input-field" value={form.role || ''} onChange={e => setForm({ ...form, role: e.target.value })} /></div>
+                                    <div><label className="label-text mb-1 block">LinkedIn Profile</label><input className="input-field" value={form.linkedinUrl || ''} onChange={e => setForm({ ...form, linkedinUrl: e.target.value })} /></div>
                                 </>
                             )}
                             {type === 'testimonials' && (
                                 <>
-                                    <div className="flex items-center gap-4">
-                                        {form.imageUrl && <Image src={form.imageUrl} alt="Preview" width={64} height={64} className="w-16 h-16 rounded-full object-cover" unoptimized />}
+                                    <div className="flex items-center gap-6 mb-4">
+                                        <div className="relative w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden border border-slate-200 dark:border-white/10 flex-shrink-0">
+                                            {form.imageUrl && <Image src={form.imageUrl} alt="Preview" fill className="object-cover" unoptimized />}
+                                        </div>
                                         <label className="btn-secondary cursor-pointer">
                                             <Upload className="w-4 h-4 mr-2" /> Upload Photo
                                             <input type="file" className="hidden" onChange={async (e) => {
@@ -427,15 +518,15 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                                             }} />
                                         </label>
                                     </div>
-                                    <input placeholder="Client Name" className="input-field" value={form.clientName || ''} onChange={e => setForm({ ...form, clientName: e.target.value })} />
-                                    <textarea placeholder="Testimonial" className="input-field min-h-[100px]" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} />
+                                    <div><label className="label-text mb-1 block">Client Name</label><input className="input-field" value={form.clientName || ''} onChange={e => setForm({ ...form, clientName: e.target.value })} /></div>
+                                    <div><label className="label-text mb-1 block">Testimonial</label><textarea className="input-field min-h-[100px]" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
                                 </>
                             )}
                         </div>
 
-                        <div className="flex gap-4 mt-8">
-                            <button onClick={() => setIsEditing(false)} className="flex-1 btn-secondary">Cancel</button>
-                            <button onClick={submit} className="flex-1 btn-primary">Save Changes</button>
+                        <div className="flex gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-white/5">
+                            <button onClick={() => setIsEditing(false)} className="flex-1 btn-secondary text-slate-500">Cancel</button>
+                            <button onClick={submit} className="flex-1 btn-primary">Save Item</button>
                         </div>
                     </div>
                 </div>
