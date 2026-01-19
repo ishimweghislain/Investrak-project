@@ -51,7 +51,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         <Link href="#about" className="hover:text-blue-600 dark:hover:text-white transition-colors">About Us</Link>
                         <Link href="#services" className="hover:text-blue-600 dark:hover:text-white transition-colors">Services</Link>
                         <Link href="#team" className="hover:text-blue-600 dark:hover:text-white transition-colors">Team</Link>
-                        <Link href="/testimonials" className="hover:text-blue-600 dark:hover:text-white transition-colors">Testimonials</Link>
+                        <Link href="#testimonials" className="hover:text-blue-600 dark:hover:text-white transition-colors">Testimonials</Link>
                         <Link href="#contact" className="hover:text-blue-600 dark:hover:text-white transition-colors">Contact</Link>
                     </div>
 
@@ -195,7 +195,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                                 </div>
                                 <div className="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden border-4 border-slate-200 dark:border-slate-700 group-hover:border-blue-500 transition-colors shadow-lg">
                                     {t.photoUrl ? (
-                                        <img src={t.photoUrl} alt={t.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                                        <img src={t.photoUrl} alt={t.name || "Team member"} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                                     ) : (
                                         <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
                                             <Users className="w-12 h-12 text-slate-400" />
@@ -214,19 +214,19 @@ export default function LandingPageClient({ settings, services, team, testimonia
 
             {/* Testimonials */}
             {testimonials && testimonials.length > 0 && (
-                <section className="py-24">
+                <section id="testimonials" className="py-24">
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-3xl font-bold text-center mb-16">Client Testimonials</h2>
                         <div className="grid md:grid-cols-3 gap-8">
                             {testimonials.map((t: any, i: number) => (
                                 <div key={t.id} className="bg-slate-50 dark:bg-white/5 p-8 rounded-[32px] hover:bg-white dark:hover:bg-white/10 transition-all cursor-default animate-fade-in-up" style={{ animationDelay: `${i * 150}ms` }}>
                                     <div className="flex items-center gap-4 mb-6">
-                                        {t.imageUrl ? <img src={t.imageUrl} className="w-12 h-12 rounded-full object-cover" /> : <div className="w-12 h-12 bg-slate-100 rounded-full"></div>}
+                                        {t.imageUrl ? <img src={t.imageUrl} alt={t.clientName || "Client"} className="w-12 h-12 rounded-full object-cover" /> : <div className="w-12 h-12 bg-slate-100 rounded-full"></div>}
                                         <div>
                                             <h4 className="font-bold">{t.clientName}</h4>
                                         </div>
                                     </div>
-                                    <p className="text-slate-500 dark:text-slate-400 italic">"{t.description}"</p>
+                                    <p className="text-slate-500 dark:text-slate-400 italic">&quot;{t.description}&quot;</p>
                                 </div>
                             ))}
                         </div>
