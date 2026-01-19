@@ -51,6 +51,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         <Link href="#about" className="hover:text-blue-600 dark:hover:text-white transition-colors">About Us</Link>
                         <Link href="#services" className="hover:text-blue-600 dark:hover:text-white transition-colors">Services</Link>
                         <Link href="#team" className="hover:text-blue-600 dark:hover:text-white transition-colors">Team</Link>
+                        <Link href="/testimonials" className="hover:text-blue-600 dark:hover:text-white transition-colors">Testimonials</Link>
                         <Link href="#contact" className="hover:text-blue-600 dark:hover:text-white transition-colors">Contact</Link>
                     </div>
 

@@ -11,7 +11,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const newMessage = await prisma.contactMessage.create({
+        const newMessage = await (prisma as any).contactMessage.create({
             data: {
                 name,
                 phone,
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
     try {
-        const messages = await prisma.contactMessage.findMany({
+        const messages = await (prisma as any).contactMessage.findMany({
             orderBy: { createdAt: 'desc' }
         });
         return NextResponse.json(messages);
