@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
                 email: true,
                 company: true,
                 role: true,
+                profileImage: true,
                 createdAt: true,
                 _count: {
                     select: { investments: true }
@@ -57,6 +58,11 @@ export async function POST(req: NextRequest) {
                 company,
                 profileImage: body.profileImage || null,
                 role: 'INVESTOR'
+            },
+            include: {
+                _count: {
+                    select: { investments: true }
+                }
             }
         });
 
@@ -96,7 +102,12 @@ export async function PUT(req: NextRequest) {
 
         const updated = await prisma.user.update({
             where: { id },
-            data: dataToUpdate
+            data: dataToUpdate,
+            include: {
+                _count: {
+                    select: { investments: true }
+                }
+            }
         });
 
         try {
@@ -127,6 +138,20 @@ export async function DELETE(req: NextRequest) {
         const id = searchParams.get('id');
 
         if (!id) return NextResponse.json({ message: 'ID required' }, { status: 400 });
+
+        // Manually handle "Cascading" deletions to avoid foreign key constraints
+        // Delete returns -> investments -> transactions -> reports -> notifications -> auditLogs -> user
+
+        // 1. Get all investments to delete their returns
+        const investments = await prisma.investment.findMany({ where: { userId: id } });
+        const investmentIds = investments.map(inv => inv.id);
+
+        await prisma.return.deleteMany({ where: { investmentId: { in: investmentIds } } });
+        await prisma.investment.deleteMany({ where: { userId: id } });
+        await prisma.transaction.deleteMany({ where: { userId: id } });
+        await prisma.report.deleteMany({ where: { userId: id } });
+        await prisma.notification.deleteMany({ where: { userId: id } });
+        await prisma.auditLog.deleteMany({ where: { userId: id } });
 
         await prisma.user.delete({ where: { id } });
 
