@@ -1,4 +1,5 @@
 
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import Link from 'next/link';
@@ -70,12 +71,12 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         </button>
                     </div>
                 </div>
-            </nav>
+            </nav >
 
 
 
             {/* Hero Section */}
-            <section className="relative pt-24 pb-32 overflow-hidden flex items-center justify-center min-h-[85vh]">
+            < section className="relative pt-24 pb-32 overflow-hidden flex items-center justify-center min-h-[85vh]" >
                 <div className="absolute inset-0 z-0 select-none">
                     <img src={heroBg} alt="Background" className="w-full h-full object-cover scale-105 animate-[pulse_10s_ease-in-out_infinite]" />
                     <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
@@ -104,10 +105,10 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         </Link>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* About Us */}
-            <section id="about" className="py-24 bg-slate-50 dark:bg-slate-900/50">
+            < section id="about" className="py-24 bg-slate-50 dark:bg-slate-900/50" >
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="grid md:grid-cols-2 gap-16 items-center">
                         <div>
@@ -141,10 +142,10 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         </div>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Services */}
-            <section id="services" className="py-24">
+            < section id="services" className="py-24" >
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Services</h2>
@@ -179,10 +180,10 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         )}
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Team */}
-            <section id="team" className="py-24 bg-slate-50 dark:bg-slate-900/50">
+            < section id="team" className="py-24 bg-slate-50 dark:bg-slate-900/50" >
                 <div className="max-w-7xl mx-auto px-6">
                     <h2 className="text-3xl font-bold text-center mb-16">Meet Our Team</h2>
                     <div className="grid md:grid-cols-3 gap-8">
@@ -210,29 +211,31 @@ export default function LandingPageClient({ settings, services, team, testimonia
                         )}
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Testimonials */}
-            {testimonials && testimonials.length > 0 && (
-                <section id="testimonials" className="py-24">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <h2 className="text-3xl font-bold text-center mb-16">Client Testimonials</h2>
-                        <div className="grid md:grid-cols-3 gap-8">
-                            {testimonials.map((t: any, i: number) => (
-                                <div key={t.id} className="bg-slate-50 dark:bg-white/5 p-8 rounded-[32px] hover:bg-white dark:hover:bg-white/10 transition-all cursor-default animate-fade-in-up" style={{ animationDelay: `${i * 150}ms` }}>
-                                    <div className="flex items-center gap-4 mb-6">
-                                        {t.imageUrl ? <img src={t.imageUrl} alt={t.clientName || "Client"} className="w-12 h-12 rounded-full object-cover" /> : <div className="w-12 h-12 bg-slate-100 rounded-full"></div>}
-                                        <div>
-                                            <h4 className="font-bold">{t.clientName}</h4>
+            {
+                testimonials && testimonials.length > 0 && (
+                    <section id="testimonials" className="py-24">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <h2 className="text-3xl font-bold text-center mb-16">Client Testimonials</h2>
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {testimonials.map((t: any, i: number) => (
+                                    <div key={t.id} className="bg-slate-50 dark:bg-white/5 p-8 rounded-[32px] hover:bg-white dark:hover:bg-white/10 transition-all cursor-default animate-fade-in-up" style={{ animationDelay: `${i * 150}ms` }}>
+                                        <div className="flex items-center gap-4 mb-6">
+                                            {t.imageUrl ? <img src={t.imageUrl} alt={t.clientName || "Client"} className="w-12 h-12 rounded-full object-cover" /> : <div className="w-12 h-12 bg-slate-100 rounded-full"></div>}
+                                            <div>
+                                                <h4 className="font-bold">{t.clientName}</h4>
+                                            </div>
                                         </div>
+                                        <p className="text-slate-500 dark:text-slate-400 italic">&quot;{t.description}&quot;</p>
                                     </div>
-                                    <p className="text-slate-500 dark:text-slate-400 italic">&quot;{t.description}&quot;</p>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                </section>
-            )}
+                    </section>
+                )
+            }
 
             {/* Contact */}
             <section id="contact" className="py-24 bg-blue-900 text-white">
@@ -352,18 +355,20 @@ export default function LandingPageClient({ settings, services, team, testimonia
             </div>
 
             {/* Login Modal */}
-            {showLoginModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowLoginModal(false)}></div>
-                    <div className="relative bg-slate-900 border border-white/10 w-full max-w-md rounded-3xl p-8 shadow-2xl">
-                        <button onClick={() => setShowLoginModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white"><X /></button>
-                        <h3 className="text-2xl font-bold text-white mb-2">Spark Investrak Portal</h3>
-                        <p className="text-slate-400 mb-8 border-b border-white/10 pb-4">Secure Client Access</p>
-                        <LoginForm />
+            {
+                showLoginModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowLoginModal(false)}></div>
+                        <div className="relative bg-slate-900 border border-white/10 w-full max-w-md rounded-3xl p-8 shadow-2xl">
+                            <button onClick={() => setShowLoginModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white"><X /></button>
+                            <h3 className="text-2xl font-bold text-white mb-2">Spark Investrak Portal</h3>
+                            <p className="text-slate-400 mb-8 border-b border-white/10 pb-4">Secure Client Access</p>
+                            <LoginForm />
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-        </div>
+        </div >
     );
 }
