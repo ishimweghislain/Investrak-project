@@ -14,6 +14,8 @@ export default function Sidebar() {
     const [user, setUser] = useState<any>(null);
     const { theme, toggleTheme } = useTheme();
 
+    const [unreadCount, setUnreadCount] = useState(0);
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -23,9 +25,29 @@ export default function Sidebar() {
         }
     }, []);
 
+    useEffect(() => {
+        const fetchInquiryCount = async () => {
+            if (user?.role === 'ADMIN') {
+                try {
+                    const res = await fetch('/api/contact');
+                    if (res.ok) {
+                        const messages = await res.json();
+                        const unread = messages.filter((m: any) => !m.isRead).length;
+                        setUnreadCount(unread);
+                    }
+                } catch (e) { }
+            }
+        };
+
+        fetchInquiryCount();
+        const interval = setInterval(fetchInquiryCount, 30000); // Poll every 30s
+        return () => clearInterval(interval);
+    }, [user]);
+
     const navItems = user?.role === 'ADMIN' ? [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Manage Investors', href: '/dashboard/manage-investors', icon: Users },
+        { name: 'Website Content', href: '/dashboard/content', icon: Search, count: unreadCount },
         { name: 'Reports', href: '/dashboard/reports', icon: FileText },
         { name: 'Audit Logs', href: '/dashboard/audit-logs', icon: Shield },
     ] : [
@@ -64,14 +86,19 @@ export default function Sidebar() {
                                 key={item.href}
                                 href={item.href}
                                 className={clsx(
-                                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm',
+                                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm group relative',
                                     isActive
                                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
                                         : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                                 )}
                             >
                                 <item.icon className="w-4 h-4" />
-                                {item.name}
+                                <span className="flex-1">{item.name}</span>
+                                {item.count !== undefined && item.count > 0 && (
+                                    <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                        {item.count}
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}

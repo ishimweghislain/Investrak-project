@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Upload, Plus, Trash2, Edit2, Loader2, Layout, Users, MessageSquare, Briefcase, Info, Phone, Mail, ChevronRight, Globe, MapPin } from 'lucide-react';
+import { Save, Upload, Plus, Trash2, Edit2, Loader2, Layout, Users, MessageSquare, Briefcase, Info, Phone, Mail, ChevronRight, Globe, MapPin, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -46,6 +46,23 @@ export default function ContentManager() {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshKey]);
+
+    const handleMarkRead = async (id: string) => {
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, isRead: true })
+            });
+
+            if (res.ok) {
+                setMessages(messages.map(m => m.id === id ? { ...m, isRead: true } : m));
+                toast.success('Marked as read');
+            }
+        } catch (error) {
+            toast.error('Failed to update status');
+        }
+    };
 
     // Generic Settings Update
     const updateSetting = (key: string, value: string) => {
@@ -141,6 +158,8 @@ export default function ContentManager() {
 
     if (loading) return <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>;
 
+    const unreadCount = messages.filter(m => !m.isRead).length;
+
     const tabs = [
         { id: 'home', label: 'Hero Section', icon: Layout, desc: 'Manage main landing visuals' },
         { id: 'about', label: 'Company Info', icon: Info, desc: 'Mission, Vision & Strategy' },
@@ -148,7 +167,7 @@ export default function ContentManager() {
         { id: 'team', label: 'Leadership', icon: Users, desc: 'Manage team members' },
         { id: 'testimonials', label: 'Testimonials', icon: MessageSquare, desc: 'Client success stories' },
         { id: 'contact', label: 'Contact Details', icon: Phone, desc: 'Address, Email & Phone' },
-        { id: 'messages', label: 'Inquiries', icon: Mail, desc: 'View received messages' },
+        { id: 'messages', label: 'Inquiries', icon: Mail, desc: 'View received messages', count: unreadCount },
     ];
 
     return (
@@ -175,8 +194,15 @@ export default function ContentManager() {
                                     <div className={`p-2 rounded-lg ${activeTab === tab.id ? 'bg-white/20' : 'bg-slate-100 dark:bg-white/5 group-hover:bg-white/10'}`}>
                                         <tab.icon className="w-4 h-4" />
                                     </div>
-                                    <div className="hidden md:block">
-                                        <div className="font-bold text-sm leading-tight">{tab.label}</div>
+                                    <div className="hidden md:block flex-1 text-left">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="font-bold text-sm leading-tight">{tab.label}</div>
+                                            {tab.count > 0 && (
+                                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                                    {tab.count}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className={`text-[10px] mt-0.5 ${activeTab === tab.id ? 'text-blue-100' : 'text-slate-400'}`}>{tab.desc}</div>
                                     </div>
                                 </button>
@@ -355,25 +381,37 @@ export default function ContentManager() {
                                     ) : (
                                         <div className="space-y-4">
                                             {messages.map((msg: any) => (
-                                                <div key={msg.id} className="p-6 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:shadow-lg transition-all group">
+                                                <div key={msg.id} className={`p-6 rounded-2xl border transition-all group relative overflow-hidden ${msg.isRead ? 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10' : 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-500/20 shadow-md'}`}>
+                                                    {!msg.isRead && (
+                                                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                                                    )}
+
                                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+                                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold relative ${msg.isRead ? 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300' : 'bg-blue-600 text-white'}`}>
                                                                 {msg.name.charAt(0).toUpperCase()}
+                                                                {!msg.isRead && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-[#0d1117]"></span>}
                                                             </div>
                                                             <div>
-                                                                <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">{msg.name}</h3>
+                                                                <h3 className={`font-bold text-lg leading-tight ${msg.isRead ? 'text-slate-700 dark:text-slate-300' : 'text-slate-900 dark:text-white'}`}>{msg.name}</h3>
                                                                 <a href={`mailto:${msg.email}`} className="text-blue-600 hover:text-blue-500 text-sm font-medium">{msg.email}</a>
                                                             </div>
                                                         </div>
-                                                        <span className="text-xs font-medium text-slate-400 bg-white dark:bg-black/20 px-3 py-1 rounded-full border border-slate-100 dark:border-white/5">
-                                                            {new Date(msg.createdAt).toLocaleString()}
-                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            {!msg.isRead && (
+                                                                <button onClick={() => handleMarkRead(msg.id)} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-colors shadow-sm">
+                                                                    <CheckCircle className="w-3.5 h-3.5" /> Mark Read
+                                                                </button>
+                                                            )}
+                                                            <span className="text-xs font-medium text-slate-400 bg-white dark:bg-black/20 px-3 py-1 rounded-full border border-slate-100 dark:border-white/5">
+                                                                {new Date(msg.createdAt).toLocaleString()}
+                                                            </span>
+                                                        </div>
                                                     </div>
 
                                                     <div className="pl-[52px]">
                                                         {msg.phone && <div className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2"><Phone className="w-3 h-3" /> {msg.phone}</div>}
-                                                        <div className="p-5 bg-white dark:bg-black/20 rounded-2xl text-slate-700 dark:text-slate-300 text-sm leading-relaxed border border-slate-100 dark:border-white/5">
+                                                        <div className={`p-5 rounded-2xl text-sm leading-relaxed border ${msg.isRead ? 'bg-white dark:bg-black/20 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-white/5' : 'bg-white dark:bg-[#161b22] text-slate-900 dark:text-white border-blue-100 dark:border-blue-500/10 shadow-sm'}`}>
                                                             {msg.message}
                                                         </div>
                                                     </div>
