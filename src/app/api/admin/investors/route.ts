@@ -77,7 +77,12 @@ export async function POST(req: NextRequest) {
         } catch (logErr) { console.log('Audit log failed', logErr); }
 
         return NextResponse.json(newInvestor);
-    } catch (e) {
+    } catch (e: any) {
+        console.error('Create Investor Error:', e);
+        if (e.code === 'P2002') {
+            const field = e.meta?.target?.[0] || 'field';
+            return NextResponse.json({ message: `This ${field} is already taken. Please use another one.` }, { status: 400 });
+        }
         return NextResponse.json({ message: 'Failed to create investor' }, { status: 500 });
     }
 }
@@ -121,7 +126,12 @@ export async function PUT(req: NextRequest) {
         } catch (logErr) { }
 
         return NextResponse.json(updated);
-    } catch (e) {
+    } catch (e: any) {
+        console.error('Update Investor Error:', e);
+        if (e.code === 'P2002') {
+            const field = e.meta?.target?.[0] || 'field';
+            return NextResponse.json({ message: `This ${field} is already taken. Please use another one.` }, { status: 400 });
+        }
         return NextResponse.json({ message: 'Failed to update' }, { status: 500 });
     }
 }
