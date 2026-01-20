@@ -18,23 +18,19 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
         }
 
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = Date.now() + '_' + file.name.replace(/\s/g, '_');
-
-        // Ensure directory exists
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
-        try {
-            await mkdir(uploadDir, { recursive: true });
-        } catch (e) {
-            // Ignore if exists
+        // Limit file size to 2MB for Base64 storage
+        if (file.size > 2 * 1024 * 1024) {
+            return NextResponse.json({ message: 'File too large (max 2MB)' }, { status: 400 });
         }
 
-        const filepath = path.join(uploadDir, filename);
-        await writeFile(filepath, buffer);
+        const buffer = await file.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        const dataUrl = `data:${file.type};base64,${base64}`;
 
-        return NextResponse.json({ url: `/uploads/${filename}` });
-    } catch (e) {
+        // Return the Data URL which can be stored directly in the database
+        return NextResponse.json({ url: dataUrl });
+    } catch (e: any) {
         console.error('Upload Error:', e);
-        return NextResponse.json({ message: 'Upload failed' }, { status: 500 });
+        return NextResponse.json({ message: 'Upload failed', error: e.message }, { status: 500 });
     }
 }
