@@ -39,20 +39,20 @@ async function main() {
 
     const images = [
         '/images/investor1.png', '/images/investor2.png', '/images/investor3.png', '/images/investor4.png',
-        '/images/investor5.jpg', '/images/investor6.png', '/images/investor7.jpg', '/images/investor8.png',
-        '/images/investor9.jpg', '/images/investor10.png', '/images/investor11.jpg', '/images/investor12.png'
+        '/images/images (1).jpg', '/images/investor6.png', '/images/images (2).jpg', '/images/investor8.png',
+        '/images/images (3).jpg', '/images/investor10.png', '/images/images (4).jpg', '/images/investor12.png'
     ];
 
-    const DEV_EMAIL = 'ishimweghislain82@gmail.com';
     const hashedPassword = await bcrypt.hash('123', 10);
 
     for (let i = 0; i < 12; i++) {
         const name = rwandanNames[i];
+        const email = `${name.toLowerCase()}@gmail.com`;
 
         await prisma.user.create({
             data: {
                 username: name,
-                email: DEV_EMAIL, // All use the same email for DEV MFA testing
+                email: email,
                 password: hashedPassword,
                 company: 'Spark holding group',
                 profileImage: images[i],
@@ -62,25 +62,19 @@ async function main() {
         console.log(`Created investor: ${name}`);
     }
 
-    // Ensure at least one admin has this email too
+    // Ensure at least one admin exists
     const adminExists = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-    if (adminExists) {
-        await prisma.user.updateMany({
-            where: { role: 'ADMIN' },
-            data: { email: DEV_EMAIL }
-        });
-        console.log('Updated existing admins to use dev email.');
-    } else {
+    if (!adminExists) {
         await prisma.user.create({
             data: {
                 username: 'admin',
-                email: DEV_EMAIL,
+                email: 'admin@spark.rw',
                 password: await bcrypt.hash('admin123', 10),
                 role: 'ADMIN',
                 company: 'Spark Leadership'
             }
         });
-        console.log('Created default admin with dev email.');
+        console.log('Created default admin.');
     }
 
     console.log('Seeding completed successfully!');

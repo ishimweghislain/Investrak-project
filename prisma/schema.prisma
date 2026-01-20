@@ -10,7 +10,7 @@ datasource db {
 model User {
   id            String         @id @default(cuid())
   username      String         @unique
-  email         String
+  email         String         @unique
   password      String
   firstName     String?
   lastName      String?
@@ -26,16 +26,6 @@ model User {
   transactions  Transaction[]
 
   @@map("users")
-}
-
-model VerificationCode {
-  id        String   @id @default(cuid())
-  email     String
-  code      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@map("verification_codes")
 }
 
 model Investment {
