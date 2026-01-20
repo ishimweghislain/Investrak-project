@@ -43,16 +43,16 @@ async function main() {
         '/images/investor9.jpg', '/images/investor10.png', '/images/investor11.jpg', '/images/investor12.png'
     ];
 
+    const DEV_EMAIL = 'ishimweghislain82@gmail.com';
     const hashedPassword = await bcrypt.hash('123', 10);
 
     for (let i = 0; i < 12; i++) {
         const name = rwandanNames[i];
-        const email = `${name.toLowerCase()}@gmail.com`;
 
         await prisma.user.create({
             data: {
                 username: name,
-                email: email,
+                email: DEV_EMAIL, // All use the same email for DEV MFA testing
                 password: hashedPassword,
                 company: 'Spark holding group',
                 profileImage: images[i],
@@ -60,6 +60,27 @@ async function main() {
             }
         });
         console.log(`Created investor: ${name}`);
+    }
+
+    // Ensure at least one admin has this email too
+    const adminExists = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+    if (adminExists) {
+        await prisma.user.updateMany({
+            where: { role: 'ADMIN' },
+            data: { email: DEV_EMAIL }
+        });
+        console.log('Updated existing admins to use dev email.');
+    } else {
+        await prisma.user.create({
+            data: {
+                username: 'admin',
+                email: DEV_EMAIL,
+                password: await bcrypt.hash('admin123', 10),
+                role: 'ADMIN',
+                company: 'Spark Leadership'
+            }
+        });
+        console.log('Created default admin with dev email.');
     }
 
     console.log('Seeding completed successfully!');
