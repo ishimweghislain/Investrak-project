@@ -48,6 +48,46 @@ export async function GET(request: NextRequest) {
             });
         }
 
+        // --- Monthly Track Logic (Verification) ---
+        // Verify if they are fulfilling their commitment
+        if (user.role === 'INVESTOR') {
+            const activeInvestments = await prisma.investment.findMany({
+                where: { userId: user.id, status: 'ACTIVE' },
+                include: { transactions: { where: { type: 'PAYMENT', status: 'COMPLETED' } } }
+            });
+
+            for (const inv of activeInvestments) {
+                if (!inv.startDate) continue;
+
+                // Months elapsed
+                const monthsElapsed = Math.max(1, Math.floor((now.getTime() - inv.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
+                const monthlyGoal = inv.amount / 60;
+                const totalGoalSoFar = monthlyGoal * monthsElapsed;
+                const totalPaid = inv.transactions.reduce((sum: number, tx: any) => sum + tx.amount, 0);
+
+                if (totalPaid < totalGoalSoFar) {
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const existingNote = await prisma.notification.findFirst({
+                        where: {
+                            userId: user.id,
+                            message: { contains: `monthly commitment for "${inv.title}"` },
+                            createdAt: { gte: startOfMonth }
+                        }
+                    });
+
+                    if (!existingNote) {
+                        await prisma.notification.create({
+                            data: {
+                                userId: user.id,
+                                message: `Monthly Reminder: You are behind on your commitment for "${inv.title}". Expected: RWF ${Math.round(totalGoalSoFar).toLocaleString()}, Paid: RWF ${totalPaid.toLocaleString()}. Please keep up!`,
+                                isRead: false
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
         // Simplified GET: Just return investments
         let investments;
         if (user.role === 'ADMIN') {

@@ -163,7 +163,9 @@ export default function Dashboard() {
                 <div className="mt-8 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-500/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div>
                         <h4 className="font-bold text-blue-900 dark:text-blue-200">Need Help?</h4>
-                        <p className="text-blue-700 dark:text-blue-400 text-sm">{isAdmin ? 'Contact the system developer.' : 'Contact your account manager for support.'}</p>
+                        <p className="text-blue-700 dark:text-blue-400 text-sm">
+                            {isAdmin ? 'Contact the system developer.' : 'Contact your account manager for support: 0781262526'}
+                        </p>
                     </div>
                     <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
                         Contact Support

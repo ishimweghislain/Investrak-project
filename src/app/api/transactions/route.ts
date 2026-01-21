@@ -81,36 +81,35 @@ export async function POST(request: NextRequest) {
                 date: date ? new Date(date) : new Date(),
             }
         });
-        // 3. Investor Notifications & Payment Status Logic
+        // 3. Investor Notifications & Admin Alerts
         if (targetUserId && type === 'PAYMENT') {
-            // Get specific investment or first active one to calculate monthly requirement
-            let investment = null;
-            if (investmentId) {
-                investment = await prisma.investment.findUnique({ where: { id: investmentId } });
-            } else {
-                investment = await prisma.investment.findFirst({
-                    where: { userId: targetUserId, status: 'ACTIVE' }
-                });
-            }
+            const investment = await prisma.investment.findUnique({ where: { id: investmentId || "" } });
 
-            if (investment) {
-                const monthlyRequired = investment.amount / 60;
-                let message = "";
-
-                if (parseFloat(amount) >= monthlyRequired) {
-                    message = `Payment received for ${investment.title}. You are on good progress, continue.`;
-                } else {
-                    message = `Payment of RWF ${parseFloat(amount).toLocaleString()} received for ${investment.title}. You are falling behind on your monthly goal of RWF ${monthlyRequired.toLocaleString()}.`;
+            // Notify Investor
+            await prisma.notification.create({
+                data: {
+                    userId: targetUserId,
+                    message: `Payment received: RWF ${parsedAmount.toLocaleString()} for ${investment?.title || 'your investment'}. Thank you!`,
+                    isRead: false
                 }
+            });
 
-                // Create notification for the investor
-                await prisma.notification.create({
-                    data: {
-                        userId: targetUserId,
-                        message: message,
-                        isRead: false
-                    }
-                });
+            // Notify all Admins
+            try {
+                const admins = await prisma.user.findMany({ where: { role: 'ADMIN' } });
+                const investor = await prisma.user.findUnique({ where: { id: targetUserId } });
+
+                for (const admin of admins) {
+                    await prisma.notification.create({
+                        data: {
+                            userId: admin.id,
+                            message: `New Payment: ${investor?.username} paid RWF ${parsedAmount.toLocaleString()} for ${investment?.title || 'Investment'}.`,
+                            isRead: false
+                        }
+                    });
+                }
+            } catch (adminErr) {
+                console.error('Failed to notify admins:', adminErr);
             }
         }
 
