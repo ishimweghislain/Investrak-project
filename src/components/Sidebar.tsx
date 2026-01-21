@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, PieChart, TrendingUp, FileText, Shield, LogOut, Sun, Moon, Search } from 'lucide-react';
+import { LayoutDashboard, Users, PieChart, TrendingUp, FileText, Shield, LogOut, Sun, Moon, Search, Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useTheme } from '@/components/ThemeProvider';
@@ -15,6 +15,7 @@ export default function Sidebar() {
     const { theme, toggleTheme } = useTheme();
 
     const [unreadCount, setUnreadCount] = useState(0);
+    const [unreadNotifications, setUnreadNotifications] = useState(0);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -26,34 +27,48 @@ export default function Sidebar() {
     }, []);
 
     useEffect(() => {
-        const fetchInquiryCount = async () => {
-            if (user?.role === 'ADMIN') {
-                try {
-                    const res = await fetch('/api/contact');
+        const fetchCounts = async () => {
+            if (!user) return;
+            try {
+                const token = localStorage.getItem('token');
+                const headers = { 'Authorization': `Bearer ${token}` };
+
+                // Fetch Unread Notifications
+                const noteRes = await fetch('/api/notifications/unread-count', { headers });
+                if (noteRes.ok) {
+                    const data = await noteRes.json();
+                    setUnreadNotifications(data.count);
+                }
+
+                // Fetch CRM Inquiries (Admins only)
+                if (user.role === 'ADMIN') {
+                    const res = await fetch('/api/contact', { headers });
                     if (res.ok) {
                         const messages = await res.json();
                         const unread = messages.filter((m: any) => !m.isRead).length;
                         setUnreadCount(unread);
                     }
-                } catch (e) { }
-            }
+                }
+            } catch (e) { }
         };
 
-        fetchInquiryCount();
-        const interval = setInterval(fetchInquiryCount, 30000); // Poll every 30s
+        fetchCounts();
+        const interval = setInterval(fetchCounts, 15000); // Poll every 15s
         return () => clearInterval(interval);
     }, [user]);
 
     const navItems = user?.role === 'ADMIN' ? [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Manage Investors', href: '/dashboard/manage-investors', icon: Users },
-        { name: 'Website Content', href: '/dashboard/content', icon: Search, count: unreadCount },
+        { name: 'Notifications', href: '/dashboard/notifications', icon: Bell, count: unreadNotifications },
+        { name: 'Inquiries', href: '/dashboard/content', icon: Search, count: unreadCount },
         { name: 'Reports', href: '/dashboard/reports', icon: FileText },
         { name: 'Audit Logs', href: '/dashboard/audit-logs', icon: Shield },
     ] : [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Portfolio', href: '/dashboard/portfolio', icon: PieChart },
-        { name: 'Investments', href: '/dashboard/investments', icon: TrendingUp },
+        { name: 'Assets', href: '/dashboard/investments', icon: TrendingUp },
+        { name: 'Notifications', href: '/dashboard/notifications', icon: Bell, count: unreadNotifications },
         { name: 'Reports', href: '/dashboard/reports', icon: FileText },
     ];
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { User, Wallet, FileText, ArrowRight, Shield } from 'lucide-react';
+import { User, Wallet, FileText, ArrowRight, Shield, PieChart as PieIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -50,6 +50,24 @@ export default function Dashboard() {
 
                 {/* Quick Actions Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    {isAdmin && (
+                        <Link href="/dashboard/overview"
+                            className="group bg-blue-600 p-6 rounded-[24px] border border-blue-500 shadow-xl shadow-blue-600/20 hover:shadow-2xl transition-all hover:-translate-y-1">
+                            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4 text-white group-hover:scale-110 transition-transform">
+                                <PieIcon className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">
+                                Strategic Overview
+                            </h3>
+                            <p className="text-blue-100 text-sm mb-4">
+                                Deep analytics on partner commitments and payment progress.
+                            </p>
+                            <div className="flex items-center text-white font-bold text-sm">
+                                View Analytics <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </Link>
+                    )}
 
                     {/* Card 1 */}
                     <Link href={isAdmin ? "/dashboard/manage-investors" : "/dashboard/portfolio"}

@@ -29,33 +29,37 @@ model User {
 }
 
 model Investment {
-  id           String           @id @default(cuid())
+  id           String    @id @default(cuid())
   title        String
   amount       Float
-  status       InvestmentStatus @default(PENDING)
-  roi          Float?
+  roi          Float
   startDate    DateTime?
   maturityDate DateTime?
+  status       String    @default("PENDING") // PENDING, ACTIVE, MATURED, CANCELLED
+  assetType    String    @default("Development") // Fundraising, Development
   userId       String
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  user         User             @relation(fields: [userId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   returns      Return[]
+  transactions Transaction[]
 
   @@map("investments")
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  type        String
-  amount      Float
-  status      String
-  date        DateTime @default(now())
-  description String?
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
+  id           String      @id @default(cuid())
+  type         String
+  amount       Float
+  status       String
+  date         DateTime    @default(now())
+  description  String?
+  userId       String
+  investmentId String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  user         User        @relation(fields: [userId], references: [id])
+  investment   Investment? @relation(fields: [investmentId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
 }
@@ -67,7 +71,7 @@ model Return {
   investmentId String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  investment   Investment @relation(fields: [investmentId], references: [id])
+  investment   Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
 
   @@map("returns")
 }

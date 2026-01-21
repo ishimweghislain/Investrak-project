@@ -26,7 +26,11 @@ export async function GET(request: NextRequest) {
                     }
                 },
                 transactions: {
-                    where: { type: 'PAYMENT', status: 'COMPLETED' },
+                    where: {
+                        type: 'PAYMENT',
+                        status: 'COMPLETED',
+                        investmentId: { not: null }
+                    },
                     select: {
                         amount: true
                     }
@@ -34,24 +38,23 @@ export async function GET(request: NextRequest) {
             }
         });
 
-        const progressData = investors.map(user => {
-            const totalInvestment = user.investments.reduce((sum, inv) => sum + inv.amount, 0);
-            const totalPaid = user.transactions.reduce((sum, tx) => sum + tx.amount, 0);
-
-            const percentage = totalInvestment > 0
-                ? Math.min(Math.round((totalPaid / totalInvestment) * 100 * 10) / 10, 100)
-                : 0;
+        const progressData = investors.map((user: any) => {
+            const totalInvestment = user.investments.reduce((sum: number, inv: any) => sum + inv.amount, 0);
+            const totalPaid = user.transactions.reduce((sum: number, tx: any) => sum + tx.amount, 0);
+            const progress = totalInvestment > 0 ? Math.min(Math.round((totalPaid / totalInvestment) * 100 * 10) / 10, 100) : 0;
 
             return {
                 id: user.id,
                 username: user.username,
                 profileImage: user.profileImage,
-                progress: percentage,
+                progress: progress,
+                totalPaid,
+                totalInvestment,
                 isCurrentUser: user.id === auth.id
             };
         });
 
-        // Ensure we only return progress data, no sensitive details
+        console.log(`Generated progress data for ${progressData.length} investors`);
         return NextResponse.json(progressData);
     } catch (error) {
         console.error('Progress API Error:', error);

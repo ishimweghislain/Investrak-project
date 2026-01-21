@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PieChart, TrendingUp, Menu, Sun, Moon, LogOut, X } from 'lucide-react';
+import { Home, PieChart, TrendingUp, Menu, Sun, Moon, LogOut, X, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { useTheme } from '@/components/ThemeProvider';
@@ -12,6 +13,7 @@ export default function BottomNav() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { theme, toggleTheme } = useTheme();
     const [user, setUser] = useState<any>(null);
+    const [unreadNotifications, setUnreadNotifications] = useState(0);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -21,6 +23,26 @@ export default function BottomNav() {
             } catch (e) { }
         }
     }, []);
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            if (!user) return;
+            try {
+                const token = localStorage.getItem('token');
+                const headers = { 'Authorization': `Bearer ${token}` };
+
+                const noteRes = await fetch('/api/notifications/unread-count', { headers });
+                if (noteRes.ok) {
+                    const data = await noteRes.json();
+                    setUnreadNotifications(data.count);
+                }
+            } catch (e) { }
+        };
+
+        fetchCounts();
+        const interval = setInterval(fetchCounts, 15000);
+        return () => clearInterval(interval);
+    }, [user]);
 
     const isAdmin = user?.role === 'ADMIN';
 
@@ -64,12 +86,15 @@ export default function BottomNav() {
                     <button
                         onClick={() => setIsMenuOpen(true)}
                         className={clsx(
-                            'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors text-slate-500 hover:text-slate-900 dark:hover:text-slate-300',
+                            'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 relative',
                             isMenuOpen && 'text-blue-600'
                         )}
                     >
                         <Menu className="w-5 h-5" />
                         <span className="text-[10px] font-bold tracking-wide">Menu</span>
+                        {unreadNotifications > 0 && (
+                            <span className="absolute top-2 right-[30%] w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#161b22]"></span>
+                        )}
                     </button>
                 </div>
             </div>
@@ -84,6 +109,34 @@ export default function BottomNav() {
                             <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-slate-100 dark:bg-white/5 rounded-full">
                                 <X className="w-5 h-5 text-slate-500" />
                             </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                            <Link
+                                href="/dashboard/notifications"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex flex-col items-center gap-3 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl relative"
+                            >
+                                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <Bell className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-bold dark:text-white text-slate-900">Notifications</span>
+                                {unreadNotifications > 0 && (
+                                    <span className="absolute top-3 right-3 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                                        {unreadNotifications}
+                                    </span>
+                                )}
+                            </Link>
+                            <Link
+                                href="/dashboard/reports"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex flex-col items-center gap-3 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl"
+                            >
+                                <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                    <PieChart className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-bold dark:text-white text-slate-900">Reports</span>
+                            </Link>
                         </div>
 
                         <div className="space-y-3">

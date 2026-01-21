@@ -35,7 +35,8 @@ export default function ManageInvestors() {
         roi: '',
         maturityDate: '',
         startDate: new Date().toISOString().split('T')[0],
-        status: 'PENDING'
+        status: 'PENDING',
+        assetType: 'Development'
     });
 
     // Notification Form
@@ -265,7 +266,8 @@ export default function ManageInvestors() {
             roi: inv.roi ? inv.roi.toString() : '',
             status: inv.status,
             startDate: inv.startDate ? new Date(inv.startDate).toISOString().split('T')[0] : '',
-            maturityDate: inv.maturityDate ? new Date(inv.maturityDate).toISOString().split('T')[0] : ''
+            maturityDate: inv.maturityDate ? new Date(inv.maturityDate).toISOString().split('T')[0] : '',
+            assetType: inv.assetType || 'Development'
         });
     };
 
@@ -293,7 +295,8 @@ export default function ManageInvestors() {
             roi: '',
             maturityDate: '',
             startDate: new Date().toISOString().split('T')[0],
-            status: 'PENDING'
+            status: 'PENDING',
+            assetType: 'Development'
         });
     };
 
@@ -521,10 +524,14 @@ export default function ManageInvestors() {
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Asset Category</label>
-                                        <div className="flex items-center gap-2 p-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl">
-                                            <Wallet className="w-4 h-4 text-slate-400" />
-                                            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Cash Deposit Only</span>
-                                        </div>
+                                        <select
+                                            className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                                            value={investmentForm.assetType}
+                                            onChange={e => setInvestmentForm({ ...investmentForm, assetType: e.target.value })}
+                                        >
+                                            <option value="Development">Development</option>
+                                            <option value="Fundraising">Fundraising</option>
+                                        </select>
                                     </div>
                                     <button className={`w-full font-bold py-4 rounded-xl text-sm transition-all mt-2 shadow-lg ${editingInvestment ? 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/20' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20'}`}>
                                         {editingInvestment ? 'Update Configuration' : 'Establish Portfolio'}
@@ -549,7 +556,7 @@ export default function ManageInvestors() {
                                                     </div>
                                                     <div className="flex items-center gap-4 text-xs text-slate-400">
                                                         <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {inv.amount.toLocaleString()}</span>
-                                                        <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" /> ROI: {inv.roi}%</span>
+                                                        <span className="flex items-center gap-1"><Wallet className="w-3 h-3" /> {inv.assetType}</span>
                                                         {inv.maturityDate && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(inv.maturityDate).toLocaleDateString()}</span>}
                                                     </div>
                                                 </div>

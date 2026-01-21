@@ -8,8 +8,9 @@ import toast from 'react-hot-toast';
 export default function PortfolioPage() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
+    const [investments, setInvestments] = useState<any[]>([]);
     const [comparativeProgress, setComparativeProgress] = useState<any[]>([]);
-    const [isPaying, setIsPaying] = useState(false);
+    const [selectedInvestmentId, setSelectedInvestmentId] = useState<string>('');
     const [paymentMethod, setPaymentMethod] = useState('');
     const [paymentAmount, setPaymentAmount] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -23,33 +24,52 @@ export default function PortfolioPage() {
         }
 
         try {
-            // Fetch personal investment & transactions
+            // 1. Fetch investments (Critical)
             const invRes = await fetch('/api/investments', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const txRes = await fetch('/api/transactions', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const progressRes = await fetch('/api/admin/investors/progress', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
 
-            if (invRes.ok && txRes.ok && progressRes.ok) {
-                const investments = await invRes.json();
-                const transactions = await txRes.json();
-                const progressData = await progressRes.json();
+            if (invRes.ok) {
+                const invs = await invRes.json();
+                setInvestments(invs);
 
-                const activeInv = investments.find((i: any) => i.status === 'ACTIVE' || i.status === 'PENDING');
+                const activeInvs = invs.filter((i: any) => i.status === 'ACTIVE' || i.status === 'PENDING');
+                if (activeInvs.length > 0 && !selectedInvestmentId) {
+                    setSelectedInvestmentId(activeInvs[0].id);
+                }
+
+                // 2. Fetch non-critical data
+                const [txRes, progressRes] = await Promise.all([
+                    fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/admin/investors/progress', { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                let transactions = [];
+                if (txRes.ok) transactions = await txRes.json();
+                if (progressRes.ok) setComparativeProgress(await progressRes.json());
+
                 const payments = transactions.filter((t: any) => t.type === 'PAYMENT');
-                const totalPaid = payments.reduce((sum: number, tx: any) => sum + tx.amount, 0);
 
-                setStats({
-                    investment: activeInv,
-                    totalPaid,
-                    progress: activeInv ? Math.min(Math.round((totalPaid / activeInv.amount) * 100 * 10) / 10, 100) : 0,
-                    monthlyRequirement: activeInv ? activeInv.amount / 60 : 0
-                });
-                setComparativeProgress(progressData);
+                // Select investment: priority to selectedId, then first active/pending, then just first one
+                let currentInv = invs.find((i: any) => i.id === selectedInvestmentId);
+                if (!currentInv) {
+                    currentInv = activeInvs.length > 0 ? activeInvs[0] : invs[0];
+                    if (currentInv) setSelectedInvestmentId(currentInv.id);
+                }
+
+                if (currentInv) {
+                    const currentInvPayments = payments.filter((p: any) => p.investmentId === currentInv.id);
+                    const currentInvPaid = currentInvPayments.reduce((sum: number, tx: any) => sum + tx.amount, 0);
+
+                    setStats({
+                        investment: currentInv,
+                        totalPaid: currentInvPaid,
+                        progress: currentInv.amount > 0 ? Math.min(Math.round((currentInvPaid / currentInv.amount) * 100 * 10) / 10, 100) : 0,
+                        monthlyRequirement: currentInv.amount / 60
+                    });
+                } else {
+                    setStats(null);
+                }
             }
         } catch (e) {
             console.error(e);
@@ -57,13 +77,17 @@ export default function PortfolioPage() {
         } finally {
             setLoading(false);
         }
-    }, [router]);
+    }, [router, selectedInvestmentId]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
     const handlePayment = async () => {
+        if (!selectedInvestmentId) {
+            toast.error('Select an investment first');
+            return;
+        }
         if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
             toast.error('Enter a valid amount');
             return;
@@ -87,19 +111,21 @@ export default function PortfolioPage() {
                     type: 'PAYMENT',
                     amount: paymentAmount,
                     paymentMethod: paymentMethod,
-                    description: `Monthly installment via ${paymentMethod}`
+                    investmentId: selectedInvestmentId,
+                    description: `Monthly installment for ${stats?.investment?.title} via ${paymentMethod}`
                 })
             });
 
             if (res.ok) {
                 toast.success('Payment simulated successfully!');
-                setIsPaying(false);
                 setPaymentAmount('');
                 setPaymentMethod('');
                 fetchData(); // Refresh progress
             } else {
-                toast.error('Payment failed');
+                const error = await res.json();
+                toast.error(error.message || 'Payment failed');
             }
+
         } catch (e) {
             toast.error('Network error');
         } finally {
@@ -130,7 +156,7 @@ export default function PortfolioPage() {
                     </button>
                 </div>
 
-                {!stats?.investment ? (
+                {investments.length === 0 ? (
                     <div className="bg-white dark:bg-[#161b22] p-12 rounded-[32px] border border-slate-200 dark:border-white/5 text-center shadow-sm">
                         <Info className="w-12 h-12 text-blue-500 mx-auto mb-4" />
                         <h3 className="text-xl font-bold mb-2">No Active Portfolio</h3>
@@ -140,43 +166,61 @@ export default function PortfolioPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Stats (Left 2 Columns) */}
                         <div className="lg:col-span-2 space-y-8">
+
+                            {/* Investment Selection Tabs */}
+                            <div className="flex overflow-x-auto gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl no-scrollbar">
+                                {investments.map((inv) => (
+                                    <button
+                                        key={inv.id}
+                                        onClick={() => setSelectedInvestmentId(inv.id)}
+                                        className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${selectedInvestmentId === inv.id
+                                            ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                                    >
+                                        {inv.title}
+                                    </button>
+                                ))}
+                            </div>
+
                             {/* Hero Progress Card */}
                             <div className="bg-gradient-to-br from-blue-600 to-indigo-800 p-8 rounded-[40px] text-white relative overflow-hidden shadow-2xl shadow-blue-600/20">
                                 <div className="absolute top-0 right-0 p-40 bg-white/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
                                 <div className="relative z-10 space-y-6">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <span className="text-blue-200 font-bold text-[10px] uppercase tracking-[0.2em] mb-1 block">Total Portfolio Goal</span>
-                                            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter">RWF {stats.investment.amount.toLocaleString()}</h2>
+                                            <span className="text-blue-200 font-bold text-[10px] uppercase tracking-[0.2em] mb-1 block">
+                                                {stats?.investment?.title} Goal
+                                            </span>
+                                            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter">RWF {stats?.investment?.amount.toLocaleString()}</h2>
                                         </div>
-                                        <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10">
-                                            <span className="text-[10px] font-bold text-blue-100 uppercase tracking-widest block mb-1">Current Progress</span>
-                                            <span className="text-2xl font-black">{stats.progress}%</span>
+                                        <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 text-right">
+                                            <span className="text-[10px] font-bold text-blue-100 uppercase tracking-widest block mb-1">Status: {stats?.investment?.status}</span>
+                                            <span className="text-2xl font-black">{stats?.progress}%</span>
                                         </div>
                                     </div>
 
                                     <div className="space-y-3">
                                         <div className="flex justify-between text-sm font-bold">
                                             <span>Maturity Completion</span>
-                                            <span className="text-blue-200">RWF {stats.totalPaid.toLocaleString()} Contribution</span>
+                                            <span className="text-blue-200">RWF {stats?.totalPaid.toLocaleString()} Contribution</span>
                                         </div>
                                         <div className="w-full h-4 bg-black/20 rounded-full p-1 overflow-hidden">
-                                            <div className="h-full bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-1000" style={{ width: `${stats.progress}%` }}></div>
+                                            <div className="h-full bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-1000" style={{ width: `${stats?.progress}%` }}></div>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4">
                                         <div className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
                                             <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Monthly Draft</span>
-                                            <p className="text-lg font-bold">RWF {stats.monthlyRequirement.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                                            <p className="text-lg font-bold">RWF {stats?.monthlyRequirement.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                                         </div>
                                         <div className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
                                             <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Timeline</span>
                                             <p className="text-lg font-bold">5 Years</p>
                                         </div>
                                         <div className="hidden md:block bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
-                                            <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Asset Type</span>
-                                            <p className="text-lg font-bold">Cash</p>
+                                            <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Asset Category</span>
+                                            <p className="text-lg font-bold">{stats?.investment?.assetType || 'Development'}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -190,7 +234,7 @@ export default function PortfolioPage() {
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold">Make Installment</h3>
-                                        <p className="text-slate-500 text-sm font-medium">Contribute to your portfolio goal</p>
+                                        <p className="text-slate-500 text-sm font-medium">Contribute to: <span className="text-blue-500 font-bold">{stats?.investment?.title}</span></p>
                                     </div>
                                 </div>
 
@@ -226,12 +270,12 @@ export default function PortfolioPage() {
                                                     type="number"
                                                     value={paymentAmount}
                                                     onChange={e => setPaymentAmount(e.target.value)}
-                                                    placeholder={stats.monthlyRequirement.toFixed(0)}
+                                                    placeholder={stats?.monthlyRequirement?.toFixed(0)}
                                                     className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-5 text-2xl font-bold outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-900 dark:text-white"
                                                 />
                                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                                                     <button
-                                                        onClick={() => setPaymentAmount(stats.monthlyRequirement.toFixed(0))}
+                                                        onClick={() => setPaymentAmount(stats?.monthlyRequirement?.toFixed(0))}
                                                         className="text-[10px] font-bold text-blue-500 hover:text-blue-600 bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
                                                     >
                                                         SET MONTHLY
@@ -274,45 +318,49 @@ export default function PortfolioPage() {
                                 </div>
 
                                 <div className="space-y-5">
-                                    {comparativeProgress.map((p: any) => (
-                                        <div key={p.id} className={`group relative space-y-2 ${p.isCurrentUser ? 'p-3 bg-blue-600/5 rounded-2xl border border-blue-500/10' : ''}`}>
-                                            <div className="flex justify-between items-center text-xs">
-                                                <div className="flex items-center gap-2">
-                                                    {p.profileImage ? (
-                                                        <img src={p.profileImage} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
-                                                    ) : (
-                                                        <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-slate-500">
-                                                            {p.username.charAt(0)}
-                                                        </div>
-                                                    )}
-                                                    <span className={`font-bold transition-colors ${p.isCurrentUser ? 'text-blue-600 font-black' : 'text-slate-600 dark:text-slate-400'}`}>
-                                                        {p.username} {p.isCurrentUser && '(You)'}
-                                                    </span>
+                                    {comparativeProgress.length > 0 ? (
+                                        comparativeProgress.map((p: any) => (
+                                            <div key={p.id} className={`group relative space-y-2 ${p.isCurrentUser ? 'p-3 bg-blue-600/5 rounded-2xl border border-blue-500/10' : ''}`}>
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <div className="flex items-center gap-2">
+                                                        {p.profileImage ? (
+                                                            <img src={p.profileImage} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
+                                                        ) : (
+                                                            <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                                                                {p.username.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                        <span className={`font-bold transition-colors ${p.isCurrentUser ? 'text-blue-600 font-black' : 'text-slate-600 dark:text-slate-400'}`}>
+                                                            {p.username} {p.isCurrentUser && '(You)'}
+                                                        </span>
+                                                    </div>
+                                                    <span className={`font-bold ${p.isCurrentUser ? 'text-blue-600' : 'text-slate-900 dark:text-white'}`}>{p.progress}%</span>
                                                 </div>
-                                                <span className={`font-bold ${p.isCurrentUser ? 'text-blue-600' : 'text-slate-900 dark:text-white'}`}>{p.progress}%</span>
+                                                <div className="w-full bg-slate-100 dark:bg-white/5 h-1.5 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={`h-full rounded-full transition-all duration-700 ${p.isCurrentUser ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
+                                                        style={{ width: `${p.progress}%` }}
+                                                    ></div>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-slate-100 dark:bg-white/5 h-1.5 rounded-full overflow-hidden">
-                                                <div
-                                                    className={`h-full rounded-full transition-all duration-700 ${p.isCurrentUser ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
-                                                    style={{ width: `${p.progress}%` }}
-                                                ></div>
+                                        ))
+                                    ) : (
+                                        loading ? Array(12).fill(0).map((_, i) => (
+                                            <div key={i} className="animate-pulse space-y-2">
+                                                <div className="flex justify-between h-4 bg-slate-100 dark:bg-white/5 rounded"></div>
+                                                <div className="h-1 bg-slate-100 dark:bg-white/5 rounded"></div>
                                             </div>
-                                        </div>
-                                    ))}
-
-                                    {comparativeProgress.length === 0 && Array(12).fill(0).map((_, i) => (
-                                        <div key={i} className="animate-pulse space-y-2">
-                                            <div className="flex justify-between h-4 bg-slate-100 dark:bg-white/5 rounded"></div>
-                                            <div className="h-1 bg-slate-100 dark:bg-white/5 rounded"></div>
-                                        </div>
-                                    ))}
+                                        )) : (
+                                            <div className="text-center py-4 text-xs text-slate-500">No member insights available.</div>
+                                        )
+                                    )}
                                 </div>
 
                                 <div className="mt-8 p-4 bg-slate-50 dark:bg-[#0d1117] rounded-2xl border border-slate-100 dark:border-white/5">
                                     <div className="flex gap-3">
                                         <TrendingUp className="w-5 h-5 text-blue-500 shrink-0" />
                                         <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                                            This chart shows the contribution progress of 12 strategic partners. All data is anonymized and shows commitment levels only.
+                                            This chart shows the contribution progress of all strategic partners. All data is anonymized and shows commitment levels only.
                                         </p>
                                     </div>
                                 </div>
