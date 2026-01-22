@@ -95,30 +95,32 @@ export default function Sidebar() {
                     <span className="text-xl font-bold dark:text-white text-slate-900 tracking-tighter">Investrak</span>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-2 mt-4">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href;
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={clsx(
-                                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm group relative',
-                                    isActive
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-                                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
-                                )}
-                            >
-                                <item.icon className="w-4 h-4" />
-                                <span className="flex-1">{item.name}</span>
-                                {item.count !== undefined && item.count > 0 && (
-                                    <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                        {item.count}
-                                    </span>
-                                )}
-                            </Link>
-                        );
-                    })}
+                <nav className="flex-1 px-4 mt-4 overflow-y-auto sidebar-scroll">
+                    <div className="space-y-2 pb-4">
+                        {navItems.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={clsx(
+                                        'flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm group relative',
+                                        isActive
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                                    )}
+                                >
+                                    <item.icon className="w-4 h-4" />
+                                    <span className="flex-1">{item.name}</span>
+                                    {item.count !== undefined && item.count > 0 && (
+                                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                            {item.count}
+                                        </span>
+                                    )}
+                                </Link>
+                            );
+                        })}
+                    </div>
                 </nav>
 
                 <div className="p-4 border-t border-slate-200 dark:border-white/10 space-y-2">
@@ -179,7 +181,7 @@ export default function Sidebar() {
             )}
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 px-3 py-2.5 rounded-[24px] shadow-2xl z-50 flex items-center gap-1 min-w-[340px]">
+            <nav className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 px-3 py-2.5 rounded-[24px] shadow-2xl z-50 flex items-center gap-1 min-w-[340px]">
                 {navItems.filter(item => ['Dashboard', user?.role === 'ADMIN' ? 'Manage Investors' : 'Portfolio', user?.role === 'ADMIN' ? 'Reports' : 'Assets', 'Notifications', 'Profile'].includes(item.name)).map((item) => {
                     const isActive = pathname === item.href;
                     return (
