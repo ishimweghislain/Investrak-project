@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     try {
         const settings = await prisma.siteSetting.findMany();
         const settingsMap: Record<string, string> = {};
-        settings.forEach(s => {
+        settings.forEach((s: any) => {
             settingsMap[s.key] = s.value;
         });
         return NextResponse.json(settingsMap);

@@ -1,6 +1,7 @@
 
 'use client';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Loader2, ArrowLeft, PieChart as PieIcon, Users, DollarSign, TrendingUp, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -182,7 +183,9 @@ export default function AdminOverviewPage() {
                                                 <td className="p-6">
                                                     <div className="flex items-center gap-3">
                                                         {investor.profileImage ? (
-                                                            <img src={investor.profileImage} alt="" className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-white/10" />
+                                                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-slate-200 dark:border-white/10">
+                                                                <Image src={investor.profileImage} alt="" fill className="object-cover" unoptimized />
+                                                            </div>
                                                         ) : (
                                                             <div className="w-10 h-10 rounded-full bg-blue-600/10 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
                                                                 {investor.username.charAt(0)}
