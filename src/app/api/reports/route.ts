@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
             orderBy: { date: 'desc' }
         });
 
-        const paymentReports = payments.map(p => ({
+        const paymentReports = payments.map((p: any) => ({
             id: p.id,
             title: `Payment Receipt: RWF ${p.amount.toLocaleString()}`,
             url: '#', // Receipts are generated client-side from transaction data
