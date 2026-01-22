@@ -154,7 +154,7 @@ export async function DELETE(req: NextRequest) {
 
         // 1. Get all investments to delete their returns
         const investments = await prisma.investment.findMany({ where: { userId: id } });
-        const investmentIds = investments.map(inv => inv.id);
+        const investmentIds = investments.map((inv: any) => inv.id);
 
         await prisma.return.deleteMany({ where: { investmentId: { in: investmentIds } } });
         await prisma.investment.deleteMany({ where: { userId: id } });

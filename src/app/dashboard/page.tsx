@@ -164,7 +164,7 @@ export default function Dashboard() {
                     <div>
                         <h4 className="font-bold text-blue-900 dark:text-blue-200">Need Help?</h4>
                         <p className="text-blue-700 dark:text-blue-400 text-sm">
-                            {isAdmin ? 'Contact the system developer.' : 'Contact your account manager for support: 0781262526'}
+                            Contact the system developer: 0781262526
                         </p>
                     </div>
                     <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">

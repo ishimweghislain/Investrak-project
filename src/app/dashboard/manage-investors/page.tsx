@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft, TrendingUp, DollarSign, Calendar, Save, Bell, Send, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -398,7 +398,7 @@ export default function ManageInvestors() {
                             <div className="mb-4">
                                 {investor.profileImage ? (
                                     <div className="w-12 h-12 rounded-xl mb-3 border border-slate-200 dark:border-white/10 overflow-hidden relative">
-                                        <img src={investor.profileImage} alt={investor.username} className="w-full h-full object-cover" />
+                                        <Image src={investor.profileImage} alt={investor.username} fill className="object-cover" unoptimized />
                                     </div>
                                 ) : (
                                     <div className="w-10 h-10 bg-gradient-to-br from-blue-600/20 to-slate-600/20 rounded-xl flex items-center justify-center mb-3 border border-white/5">
@@ -613,7 +613,9 @@ export default function ManageInvestors() {
                                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Profile Image</label>
                                 <div className="flex items-center gap-4">
                                     {formData.profileImage && (
-                                        <img src={formData.profileImage} alt="Preview" className="w-12 h-12 rounded-full object-cover border border-white/10" />
+                                        <div className="relative w-12 h-12 rounded-full overflow-hidden border border-white/10">
+                                            <Image src={formData.profileImage} alt="Preview" fill className="object-cover" unoptimized />
+                                        </div>
                                     )}
                                     <label className="cursor-pointer bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/5 px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
                                         {fileUploading ? 'Uploading...' : 'Choose File'}

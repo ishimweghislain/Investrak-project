@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, PieChart, TrendingUp, FileText, Shield, LogOut, Sun, Moon, Search, Bell } from 'lucide-react';
+import { LayoutDashboard, Users, User, PieChart, TrendingUp, FileText, Shield, LogOut, Sun, Moon, Search, Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useTheme } from '@/components/ThemeProvider';
@@ -64,12 +64,14 @@ export default function Sidebar() {
         { name: 'Inquiries', href: '/dashboard/content', icon: Search, count: unreadCount },
         { name: 'Reports', href: '/dashboard/reports', icon: FileText },
         { name: 'Audit Logs', href: '/dashboard/audit-logs', icon: Shield },
+        { name: 'Profile', href: '/dashboard/profile', icon: User },
     ] : [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Portfolio', href: '/dashboard/portfolio', icon: PieChart },
         { name: 'Assets', href: '/dashboard/investments', icon: TrendingUp },
         { name: 'Notifications', href: '/dashboard/notifications', icon: Bell, count: unreadNotifications },
         { name: 'Reports', href: '/dashboard/reports', icon: FileText },
+        { name: 'Profile', href: '/dashboard/profile', icon: User },
     ];
 
     const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -85,7 +87,7 @@ export default function Sidebar() {
 
     return (
         <>
-            <aside className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 bg-[#0d1117] dark:bg-[#0d1117] bg-white border-r border-slate-200 dark:border-white/10 z-40">
+            <aside className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 dark:bg-[#0d1117] bg-white border-r border-slate-200 dark:border-white/10 z-40">
                 <div className="p-6 flex items-center gap-2">
                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                         <TrendingUp className="w-5 h-5 text-white" />
@@ -175,6 +177,31 @@ export default function Sidebar() {
                     </div>
                 </div>
             )}
+
+            {/* Mobile Bottom Navigation */}
+            <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 px-3 py-2.5 rounded-[24px] shadow-2xl z-50 flex items-center gap-1 min-w-[340px]">
+                {navItems.filter(item => ['Dashboard', user?.role === 'ADMIN' ? 'Manage Investors' : 'Portfolio', user?.role === 'ADMIN' ? 'Reports' : 'Assets', 'Notifications', 'Profile'].includes(item.name)).map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={clsx(
+                                'flex flex-col items-center justify-center p-2 rounded-2xl min-w-[64px] transition-all relative',
+                                isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                            )}
+                        >
+                            <item.icon className="w-5 h-5 mb-0.5" />
+                            <span className="text-[10px] font-bold tracking-tight">{item.name === 'Manage Investors' ? 'Investors' : item.name}</span>
+                            {item.count !== undefined && item.count > 0 && (
+                                <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[15px] border-2 border-white dark:border-[#0d1117]">
+                                    {item.count}
+                                </span>
+                            )}
+                        </Link>
+                    );
+                })}
+            </nav>
         </>
     );
 }

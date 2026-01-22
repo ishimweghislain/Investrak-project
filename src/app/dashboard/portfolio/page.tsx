@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2, PieChart, ArrowUpRight, Wallet, ArrowLeft, RefreshCw, Smartphone, CreditCard, Landmark, Send, CheckCircle2, TrendingUp, Users, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 export default function PortfolioPage() {
@@ -324,7 +325,9 @@ export default function PortfolioPage() {
                                                 <div className="flex justify-between items-center text-xs">
                                                     <div className="flex items-center gap-2">
                                                         {p.profileImage ? (
-                                                            <img src={p.profileImage} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
+                                                            <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/10 shrink-0">
+                                                                <Image src={p.profileImage} alt="" fill className="object-cover" unoptimized />
+                                                            </div>
                                                         ) : (
                                                             <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-slate-500">
                                                                 {p.username.charAt(0)}
