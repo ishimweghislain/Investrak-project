@@ -7,7 +7,8 @@ import {
     BarChart3, Shield, CheckCircle, TrendingUp, Users,
     FileText, ArrowRight, Lock, Globe, Mail, MapPin,
     Phone, HelpCircle, AlertTriangle, Menu, X, Facebook, Linkedin, Briefcase,
-    Sparkles, Award, Target, Zap, MessageSquare
+    Sparkles, Award, Target, Zap, MessageSquare,
+    User, Coins, Building2, GraduationCap, Sprout, Gavel, Map, Car, Languages
 } from 'lucide-react';
 import LoginForm from '@/components/LoginForm';
 import { useState, useEffect } from 'react';
@@ -17,6 +18,57 @@ export default function LandingPageClient({ settings, services, team, testimonia
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [serviceLang, setServiceLang] = useState<'en' | 'fr' | 'rw'>('en');
+
+    const serviceTranslations: any = {
+        en: {
+            title: "Our Services",
+            subtitle: "Money Lending Solutions",
+            description: "Tailored financial lending services designed to help you achieve your goals",
+            items: [
+                { title: "Person Loans", desc: "Quick and flexible personal loans tailored to your individual needs.", icon: User },
+                { title: "SALARY Advance", desc: "Get early access to your earnings for unforeseen expenses.", icon: Coins },
+                { title: "Business Loans", desc: "Fuel your business growth with our competitive financing options.", icon: Building2 },
+                { title: "School Fees Loans", desc: "Invest in education with our dedicated student and tuition loans.", icon: GraduationCap },
+                { title: "Agricultural Loans", desc: "Support for farmers to boost productivity and farm expansion.", icon: Sprout },
+                { title: "Auction Loans", desc: "Short-term financing specifically for auction purchases.", icon: Gavel },
+                { title: "Land Loans", desc: "Secure your future by investing in land with our help.", icon: Map },
+                { title: "Car Loans", desc: "Get on the road faster with our easy vehicle financing.", icon: Car },
+            ]
+        },
+        fr: {
+            title: "Nos Services",
+            subtitle: "Solutions de Prêt d'Argent",
+            description: "Services de prêt financier personnalisés conçus pour vous aider à atteindre vos objectifs",
+            items: [
+                { title: "Prêts Personnels", desc: "Des prêts personnels rapides et flexibles adaptés à vos besoins individuels.", icon: User },
+                { title: "Avance sur Salaire", desc: "Accédez tôt à vos gains pour des dépenses imprévues.", icon: Coins },
+                { title: "Prêts Commerciaux", desc: "Alimentez la croissance de votre entreprise avec nos options de financement compétitives.", icon: Building2 },
+                { title: "Prêts Scolaires", desc: "Investissez dans l'éducation avec nos prêts dédiés aux étudiants et aux frais de scolarité.", icon: GraduationCap },
+                { title: "Prêts Agricoles", desc: "Soutien aux agriculteurs pour stimuler la productivité et l'expansion des fermes.", icon: Sprout },
+                { title: "Prêts pour Enchères", desc: "Financement à court terme spécifiquement pour les achats aux enchères.", icon: Gavel },
+                { title: "Prêts Fonciers", desc: "Assurez votre avenir en investissant dans la terre avec notre aide.", icon: Map },
+                { title: "Prêts Automobiles", desc: "Prenez la route plus rapidement avec notre financement de véhicule facile.", icon: Car },
+            ]
+        },
+        rw: {
+            title: "Serivisi Tanga",
+            subtitle: "Guhabwa Inguzanyo",
+            description: "Serivisi z'inguzanyo ziboneye kandi zoroheje zigufasha kugera ku ntego zawe",
+            items: [
+                { title: "Inguzanyo y'Umuntu", desc: "Inguzanyo yihuse kandi yoroheje ijyanye n'ibyo ukeneye ku giti cyawe.", icon: User },
+                { title: "Umushahara Mbere", desc: "Habwa igice cy'umushahara wawe mbere y'igihe ku bibazo bitunguranye.", icon: Coins },
+                { title: "Inguzanyo y'Ubucuruzi", desc: "Gura ubucuruzi bwawe ukoresheje amatsinda yacu y'imari anogeye bose.", icon: Building2 },
+                { title: "Inguzanyo y'Ishuri", desc: "Shora mu burezi ukoresheje inguzanyo zacu zigenewe kwishyura amashuri.", icon: GraduationCap },
+                { title: "Inguzanyo y'Ubuhinzi", desc: "Gushyigikira abahinzi kugira ngo bongere umusaruro no kwagura ubuhinzi.", icon: Sprout },
+                { title: "Inguzanyo zo mu Cyamunara", desc: "Inkunga y'igihe gito igenewe cyane cyane abagura mu cyamunara.", icon: Gavel },
+                { title: "Inguzanyo y'Ubutaka", desc: "Segura ejo hazaza hawe ushora mu butaka ubinyujije muri twe.", icon: Map },
+                { title: "Inguzanyo y'Imodoka", desc: "Gura imodoka wifuza mu buryo bworoshye kandi bwihuse.", icon: Car },
+            ]
+        }
+    };
+
+    const currentServices = serviceTranslations[serviceLang];
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -244,50 +296,46 @@ export default function LandingPageClient({ settings, services, team, testimonia
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent"></div>
                 <div className="max-w-7xl mx-auto px-6 relative">
                     <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600/10 rounded-full text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-3">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600/10 rounded-full text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
                             <Briefcase className="w-3 h-3" />
-                            Our Services
+                            {currentServices.title}
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-black mb-3 tracking-tight">Comprehensive Solutions</h2>
-                        <p className="text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">Tailored financial services designed to help you achieve your goals</p>
+                        <h2 className="text-3xl md:text-4xl font-black mb-3 tracking-tight">{currentServices.subtitle}</h2>
+                        <p className="text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-8">{currentServices.description}</p>
+
+                        {/* Translation Selector */}
+                        <div className="inline-flex items-center gap-1 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                            {[
+                                { lng: 'en', label: 'English', flag: '🇺🇸' },
+                                { lng: 'fr', label: 'Français', flag: '🇫🇷' },
+                                { lng: 'rw', label: 'Ikinyarwanda', flag: '🇷🇼' }
+                            ].map((item) => (
+                                <button
+                                    key={item.lng}
+                                    onClick={() => setServiceLang(item.lng as any)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${serviceLang === item.lng ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                                >
+                                    <span>{item.flag}</span>
+                                    <span className="hidden sm:inline">{item.label}</span>
+                                    <span className="sm:hidden">{item.lng.toUpperCase()}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {services && services.length > 0 ? services.map((s: any, i: number) => (
-                            <div key={s.id} className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-white/5 hover:border-blue-500/50 dark:hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="grid md:grid-cols-4 gap-6">
+                        {currentServices.items.map((service: any, idx: number) => (
+                            <div key={idx} className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-white/5 hover:border-blue-500/50 dark:hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
                                 <div className="relative">
                                     <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                                        <Briefcase className="w-7 h-7 text-white" />
+                                        <service.icon className="w-7 h-7 text-white" />
                                     </div>
-                                    <h3 className="text-xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{s.title}</h3>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">{s.description}</p>
-                                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-sm group-hover:gap-3 transition-all">
-                                        <span>Learn More</span>
-                                        <ArrowRight className="w-4 h-4" />
-                                    </div>
+                                    <h3 className="text-xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">{service.title}</h3>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{service.desc}</p>
                                 </div>
                             </div>
-                        )) : (
-                            <>
-                                {[
-                                    { title: 'Money Lending', desc: 'Fast, competitive loans for personal and business needs.', icon: BarChart3 },
-                                    { title: 'Finance Advisory', desc: 'Expert guidance to manage wealth and optimize portfolios.', icon: TrendingUp },
-                                    { title: 'Investment Tracking', desc: 'Real-time monitoring of your assets via our secure portal.', icon: Shield }
-                                ].map((service, idx) => (
-                                    <div key={idx} className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-white/5 hover:border-blue-500/50 dark:hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2">
-                                        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
-                                        <div className="relative">
-                                            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                                                <service.icon className="w-7 h-7 text-white" />
-                                            </div>
-                                            <h3 className="text-xl font-black mb-3 text-slate-900 dark:text-white">{service.title}</h3>
-                                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{service.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </>
-                        )}
+                        ))}
                     </div>
                 </div>
             </section>
