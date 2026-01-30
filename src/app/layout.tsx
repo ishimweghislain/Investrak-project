@@ -8,6 +8,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Investrak - Smart Investment Tracking",
   description: "Take control of your financial future with our comprehensive investment tracking platform. Monitor portfolios, analyze trends, and make informed decisions with real-time data.",
+  icons: {
+    icon: "/images/logo.jpeg",
+    apple: "/images/logo.jpeg",
+  }
 };
 
 export default function RootLayout({

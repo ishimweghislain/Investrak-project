@@ -81,7 +81,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
     const heroSubtitle = settings.home_subtitle || 'Operating in Rwanda, we specialize in strategic investments, money lending, and financial advisory services.';
 
     const heroBg = settings.home_bg && settings.home_bg !== '' ? settings.home_bg : '/hero-bg.png';
-    const logoSrc = settings.home_logo && settings.home_logo !== '' ? settings.home_logo : '/spark-logo.png';
+    const logoSrc = settings.home_logo && settings.home_logo !== '' ? settings.home_logo : '/images/logo.jpeg';
 
     // Address defaults
     const address = settings.contact_address || 'Spark Holding Ltd, Remera KG 182 Street, Amora House, 1st Floor, Door 4, Kigali, Rwanda';
