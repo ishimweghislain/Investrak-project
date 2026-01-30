@@ -6,8 +6,8 @@ import ToastProvider from "@/components/ToastProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Investrak - Smart Investment Tracking",
-  description: "Take control of your financial future with our comprehensive investment tracking platform. Monitor portfolios, analyze trends, and make informed decisions with real-time data.",
+  title: "Spark Holding Group - Money Lending & Financial Solutions",
+  description: "Empowering your financial journey with flexible money lending, strategic investments, and expert financial advisory in Rwanda.",
   icons: {
     icon: "/images/logo.jpeg",
     apple: "/images/logo.jpeg",

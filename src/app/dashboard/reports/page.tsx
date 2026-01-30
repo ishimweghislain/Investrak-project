@@ -174,7 +174,7 @@ export default function ReportsPage() {
                 {/* Unified List */}
                 <div id="print-area" className="space-y-4">
                     <div className="bg-blue-600 p-8 rounded-[32px] mb-8 hidden print:block text-white">
-                        <h2 className="text-4xl font-black">Investrak Financial Report</h2>
+                        <h2 className="text-4xl font-black">Spark Holding Group Financial Report</h2>
                         <p className="text-blue-100 font-bold opacity-80 mt-1 uppercase tracking-widest text-xs">Generated on {new Date().toLocaleDateString()}</p>
                     </div>
 

@@ -92,7 +92,7 @@ export default function Sidebar() {
                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                         <TrendingUp className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-xl font-bold dark:text-white text-slate-900 tracking-tighter">Investrak</span>
+                    <span className="text-xl font-bold dark:text-white text-slate-900 tracking-tighter">Spark Holding</span>
                 </div>
 
                 <nav className="flex-1 px-4 mt-4 overflow-y-auto sidebar-scroll">

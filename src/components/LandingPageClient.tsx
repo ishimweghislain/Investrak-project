@@ -78,7 +78,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
 
     // Initial Defaults if settings are empty
     const heroTitle = settings.home_title || 'Spark Holding Group';
-    const heroSubtitle = settings.home_subtitle || 'Operating in Rwanda, we specialize in strategic investments, money lending, and financial advisory services.';
+    const heroSubtitle = settings.home_subtitle || 'Operating in Rwanda, Spark Holding Group is a premier money lending group specializing in strategic investments and financial advisory services.';
 
     const heroBg = settings.home_bg && settings.home_bg !== '' ? settings.home_bg : '/hero-bg.png';
     const logoSrc = settings.home_logo && settings.home_logo !== '' ? settings.home_logo : '/images/logo.jpeg';
@@ -233,7 +233,7 @@ export default function LandingPageClient({ settings, services, team, testimonia
                                     {
                                         icon: Target,
                                         title: 'Our Mission',
-                                        text: settings.mission_text || 'To provide accessible financial solutions through ethical money lending and transparent investment tracking.',
+                                        text: settings.mission_text || 'To provide accessible financial solutions through ethical money lending and transparent financial management as a leading money lending group.',
                                         color: 'blue'
                                     },
                                     {

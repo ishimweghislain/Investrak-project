@@ -13,7 +13,7 @@ async function main() {
     update: {},
     create: {
       username: 'admin',
-      email: 'admin@investrak.com',
+      email: 'admin@sparkholding.rw',
       password: adminPassword,
       firstName: 'Admin',
       lastName: 'User',
