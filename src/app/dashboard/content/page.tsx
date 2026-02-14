@@ -5,6 +5,11 @@ import { Save, Upload, Plus, Trash2, Edit2, Loader2, Layout, Users, MessageSquar
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 
+const inputClasses = "w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm transition-all focus:border-blue-500 dark:focus:border-blue-500 shadow-sm focus:bg-white dark:focus:bg-[#0a0c10]";
+const labelClasses = "text-[11px] font-bold text-slate-500 uppercase tracking-widest";
+const btnPrimaryClasses = "flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 text-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer";
+const btnSecondaryClasses = "flex items-center justify-center px-4 py-3 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold rounded-xl transition-all text-xs active:scale-95 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-sm cursor-pointer";
+
 export default function ContentManager() {
     const [activeTab, setActiveTab] = useState('home');
     const [loading, setLoading] = useState(true);
@@ -161,7 +166,7 @@ export default function ContentManager() {
     const unreadCount = messages.filter(m => !m.isRead).length;
 
     const tabs = [
-        { id: 'home', label: 'Hero Section', icon: Layout, desc: 'Manage main landing visuals' },
+        { id: 'home', label: 'Home Section', icon: Layout, desc: 'Manage main landing visuals' },
         { id: 'about', label: 'Company Info', icon: Info, desc: 'Mission, Vision & Strategy' },
         { id: 'services', label: 'Our Services', icon: Briefcase, desc: 'Manage service offerings' },
         { id: 'team', label: 'Leadership', icon: Users, desc: 'Manage team members' },
@@ -221,10 +226,10 @@ export default function ContentManager() {
                                 <div className="space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-6">
                                         <div>
-                                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Hero Configuration</h2>
+                                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Home Configuration</h2>
                                             <p className="text-slate-500 text-sm mt-1">Customize the main landing section.</p>
                                         </div>
-                                        <button onClick={saveSettings} className="btn-primary"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
+                                        <button onClick={saveSettings} className={btnPrimaryClasses}><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                     </div>
 
                                     <div className="grid md:grid-cols-2 gap-8">
@@ -241,7 +246,7 @@ export default function ContentManager() {
                                                     <div className="aspect-video bg-slate-200 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 text-sm">No Image</div>
                                                 )}
                                             </div>
-                                            <label className="btn-secondary w-full cursor-pointer py-4">
+                                            <label className={`${btnSecondaryClasses} w-full py-4`}>
                                                 <Upload className="w-4 h-4 mr-2" /> Change Background
                                                 <input type="file" className="hidden" onChange={async (e) => {
                                                     if (e.target.files?.[0]) {
@@ -254,12 +259,12 @@ export default function ContentManager() {
 
                                         <div className="space-y-6">
                                             <div>
-                                                <label className="label-text">Company Name (Hero Title)</label>
-                                                <input type="text" className="input-field font-bold text-lg" value={settings.home_title || ''} onChange={e => updateSetting('home_title', e.target.value)} placeholder="e.g. Spark Holding" />
+                                                <label className={labelClasses}>Company Name (Home Title)</label>
+                                                <input type="text" className={`${inputClasses} font-bold text-lg`} value={settings.home_title || ''} onChange={e => updateSetting('home_title', e.target.value)} placeholder="e.g. Spark Holding" />
                                             </div>
                                             <div>
-                                                <label className="label-text">Tagline / Subtitle</label>
-                                                <textarea className="input-field min-h-[120px] text-base" value={settings.home_subtitle || ''} onChange={e => updateSetting('home_subtitle', e.target.value)} placeholder="Enter a catchy tagline..." />
+                                                <label className={labelClasses}>Tagline / Subtitle</label>
+                                                <textarea className={`${inputClasses} min-h-[120px] text-base`} value={settings.home_subtitle || ''} onChange={e => updateSetting('home_subtitle', e.target.value)} placeholder="Enter a catchy tagline..." />
                                             </div>
                                             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/5 flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
@@ -273,7 +278,7 @@ export default function ContentManager() {
                                                         <div className="text-xs text-slate-500">PNG, JPG recommended</div>
                                                     </div>
                                                 </div>
-                                                <label className="btn-secondary cursor-pointer text-xs">
+                                                <label className={`${btnSecondaryClasses} text-xs`}>
                                                     <Upload className="w-3 h-3 mr-2" /> Upload
                                                     <input type="file" className="hidden" onChange={async (e) => {
                                                         if (e.target.files?.[0]) {
@@ -295,7 +300,7 @@ export default function ContentManager() {
                                             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Company Information</h2>
                                             <p className="text-slate-500 text-sm mt-1">Define your mission, vision, and strategy.</p>
                                         </div>
-                                        <button onClick={saveSettings} className="btn-primary"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
+                                        <button onClick={saveSettings} className={btnPrimaryClasses}><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                     </div>
 
                                     <div className="space-y-6">
@@ -305,9 +310,9 @@ export default function ContentManager() {
                                             { key: 'strategy_text', label: 'Our Strategy', placeholder: 'How will you achieve your goals?' }
                                         ].map(field => (
                                             <div key={field.key} className="relative">
-                                                <label className="label-text mb-2 block">{field.label}</label>
+                                                <label className={`${labelClasses} mb-2 block`}>{field.label}</label>
                                                 <textarea
-                                                    className="input-field min-h-[140px] text-base leading-relaxed"
+                                                    className={`${inputClasses} min-h-[140px] text-base leading-relaxed`}
                                                     value={settings[field.key] || ''}
                                                     onChange={e => updateSetting(field.key, e.target.value)}
                                                     placeholder={field.placeholder}
@@ -325,7 +330,7 @@ export default function ContentManager() {
                                             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Contact Details</h2>
                                             <p className="text-slate-500 text-sm mt-1">Where can people find you?</p>
                                         </div>
-                                        <button onClick={saveSettings} className="btn-primary"><Save className="w-4 h-4 mr-2" /> Save Changes</button>
+                                        <button onClick={saveSettings} className={btnPrimaryClasses}><Save className="w-4 h-4 mr-2" /> Save Changes</button>
                                     </div>
 
                                     <div className="grid md:grid-cols-2 gap-6">
@@ -336,12 +341,12 @@ export default function ContentManager() {
                                             { key: 'contact_website', label: 'Website URL', icon: Globe },
                                         ].map(field => (
                                             <div key={field.key}>
-                                                <label className="label-text flex items-center gap-2 mb-2">
+                                                <label className={`${labelClasses} flex items-center gap-2 mb-2`}>
                                                     <field.icon className="w-3 h-3 opacity-50" /> {field.label}
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    className="input-field"
+                                                    className={inputClasses}
                                                     value={settings[field.key] || ''}
                                                     onChange={e => updateSetting(field.key, e.target.value)}
                                                 />
@@ -426,20 +431,7 @@ export default function ContentManager() {
                 </div>
             </div>
 
-            <style jsx global>{`
-                .input-field {
-                    @apply w-full bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm transition-all focus:border-blue-500 dark:focus:border-blue-500 shadow-sm focus:bg-white dark:focus:bg-[#0a0c10];
-                }
-                .label-text {
-                    @apply text-[11px] font-bold text-slate-500 uppercase tracking-widest;
-                }
-                .btn-primary {
-                    @apply flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 text-sm active:scale-95;
-                }
-                .btn-secondary {
-                    @apply flex items-center justify-center px-4 py-3 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold rounded-xl transition-all text-xs active:scale-95 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-sm;
-                }
-            `}</style>
+
         </div>
     );
 }
@@ -476,7 +468,7 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white capitalize">{type} List</h2>
                     <p className="text-slate-500 text-sm mt-1">Manage your {type} items.</p>
                 </div>
-                <button onClick={() => startEdit()} className="btn-primary"><Plus className="w-4 h-4 mr-2" /> Add New</button>
+                <button onClick={() => startEdit()} className={btnPrimaryClasses}><Plus className="w-4 h-4 mr-2" /> Add New</button>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -515,8 +507,8 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                         <div className="space-y-5">
                             {type === 'services' && (
                                 <>
-                                    <div><label className="label-text mb-1 block">Title</label><input className="input-field" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
-                                    <div><label className="label-text mb-1 block">Description</label><textarea className="input-field min-h-[100px]" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
+                                    <div><label className={`${labelClasses} mb-1 block`}>Title</label><input className={inputClasses} value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+                                    <div><label className={`${labelClasses} mb-1 block`}>Description</label><textarea className={`${inputClasses} min-h-[100px]`} value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
                                 </>
                             )}
                             {type === 'team' && (
@@ -525,7 +517,7 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                                         <div className="relative w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 flex-shrink-0">
                                             {form.photoUrl && <Image src={form.photoUrl} alt="Preview" fill className="object-cover" unoptimized />}
                                         </div>
-                                        <label className="btn-secondary cursor-pointer">
+                                        <label className={btnSecondaryClasses}>
                                             <Upload className="w-4 h-4 mr-2" /> Upload Photo
                                             <input type="file" className="hidden" onChange={async (e) => {
                                                 if (e.target.files?.[0]) {
@@ -535,9 +527,9 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                                             }} />
                                         </label>
                                     </div>
-                                    <div><label className="label-text mb-1 block">Full Name</label><input className="input-field" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
-                                    <div><label className="label-text mb-1 block">Role / Position</label><input className="input-field" value={form.role || ''} onChange={e => setForm({ ...form, role: e.target.value })} /></div>
-                                    <div><label className="label-text mb-1 block">LinkedIn Profile</label><input className="input-field" value={form.linkedinUrl || ''} onChange={e => setForm({ ...form, linkedinUrl: e.target.value })} /></div>
+                                    <div><label className={`${labelClasses} mb-1 block`}>Full Name</label><input className={inputClasses} value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+                                    <div><label className={`${labelClasses} mb-1 block`}>Role / Position</label><input className={inputClasses} value={form.role || ''} onChange={e => setForm({ ...form, role: e.target.value })} /></div>
+                                    <div><label className={`${labelClasses} mb-1 block`}>LinkedIn Profile</label><input className={inputClasses} value={form.linkedinUrl || ''} onChange={e => setForm({ ...form, linkedinUrl: e.target.value })} /></div>
                                 </>
                             )}
                             {type === 'testimonials' && (
@@ -546,7 +538,7 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                                         <div className="relative w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden border border-slate-200 dark:border-white/10 flex-shrink-0">
                                             {form.imageUrl && <Image src={form.imageUrl} alt="Preview" fill className="object-cover" unoptimized />}
                                         </div>
-                                        <label className="btn-secondary cursor-pointer">
+                                        <label className={btnSecondaryClasses}>
                                             <Upload className="w-4 h-4 mr-2" /> Upload Photo
                                             <input type="file" className="hidden" onChange={async (e) => {
                                                 if (e.target.files?.[0]) {
@@ -556,15 +548,15 @@ function ListManager({ type, data, setData, onUpload, onCreate, onUpdate, onDele
                                             }} />
                                         </label>
                                     </div>
-                                    <div><label className="label-text mb-1 block">Client Name</label><input className="input-field" value={form.clientName || ''} onChange={e => setForm({ ...form, clientName: e.target.value })} /></div>
-                                    <div><label className="label-text mb-1 block">Testimonial</label><textarea className="input-field min-h-[100px]" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
+                                    <div><label className={`${labelClasses} mb-1 block`}>Client Name</label><input className={inputClasses} value={form.clientName || ''} onChange={e => setForm({ ...form, clientName: e.target.value })} /></div>
+                                    <div><label className={`${labelClasses} mb-1 block`}>Testimonial</label><textarea className={`${inputClasses} min-h-[100px]`} value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
                                 </>
                             )}
                         </div>
 
                         <div className="flex gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-white/5">
-                            <button onClick={() => setIsEditing(false)} className="flex-1 btn-secondary text-slate-500">Cancel</button>
-                            <button onClick={submit} className="flex-1 btn-primary">Save Item</button>
+                            <button onClick={() => setIsEditing(false)} className={`flex-1 ${btnSecondaryClasses}`}>Cancel</button>
+                            <button onClick={submit} className={`flex-1 ${btnPrimaryClasses}`}>Save Item</button>
                         </div>
                     </div>
                 </div>
