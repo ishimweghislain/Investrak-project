@@ -30,16 +30,28 @@ export default function PortfolioPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
+            console.log('API Response Status:', invRes.status);
+
+            // Handle 431 error - token is corrupted/too large
+            if (invRes.status === 431) {
+                console.error('❌ 431 Error: Request Header Too Large');
+                console.error('Token length:', token.length);
+                toast.error('Token error detected. Please clear your browser cache and log in again.');
+                setLoading(false);
+                return;
+            }
+
+            // Handle other errors
             if (!invRes.ok) {
-                const errorData = await invRes.json().catch(() => ({ message: 'Failed to load investments' }));
-                console.error('Investment fetch error:', errorData);
-                toast.error(errorData.message || 'Failed to load investments');
+                const errorText = await invRes.text().catch(() => 'Unknown error');
+                console.error('Investment fetch failed:', invRes.status, errorText);
+                toast.error(`Failed to load investments (${invRes.status}). Please try again.`);
                 setLoading(false);
                 return;
             }
 
             const invs = await invRes.json();
-            console.log('Loaded investments:', invs);
+            console.log('✅ Loaded investments:', invs.length, 'items');
             setInvestments(invs);
 
             const activeInvs = invs.filter((i: any) => i.status === 'ACTIVE' || i.status === 'PENDING');
@@ -47,26 +59,32 @@ export default function PortfolioPage() {
                 setSelectedInvestmentId(activeInvs[0].id);
             }
 
-            // 2. Fetch non-critical data
-            const txRes = await fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` } });
+            // 2. Fetch transactions
+            const txRes = await fetch('/api/transactions', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
             let transactions = [];
             if (txRes.ok) {
                 transactions = await txRes.json();
+                console.log('✅ Loaded transactions:', transactions.length, 'items');
             } else {
-                console.warn('Failed to load transactions');
+                console.warn('⚠️ Failed to load transactions');
             }
 
-            // 3. Try to fetch progress data (optional, may fail for non-admins)
+            // 3. Try to fetch progress data (optional for investors)
             try {
-                const progressRes = await fetch('/api/admin/investors/progress', { headers: { 'Authorization': `Bearer ${token}` } });
+                const progressRes = await fetch('/api/admin/investors/progress', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if (progressRes.ok) {
                     const progressData = await progressRes.json();
                     setComparativeProgress(progressData);
+                    console.log('✅ Loaded progress data');
                 }
             } catch (progressErr) {
-                console.log('Progress data not available (this is normal for investors)');
-                // Don't show error to user - this is expected for non-admin users
+                // Silent fail - this is expected for non-admin users
+                console.log('ℹ️ Progress data not available (normal for investors)');
             }
 
             const payments = transactions.filter((t: any) => t.type === 'PAYMENT');
@@ -93,12 +111,17 @@ export default function PortfolioPage() {
                     monthlyRequirement: currentInv.amount / durationMonths,
                     durationYears: Math.round(durationMonths / 12)
                 });
+                console.log('✅ Portfolio stats calculated');
             } else {
                 setStats(null);
             }
-        } catch (e) {
-            console.error('Portfolio data fetch error:', e);
-            toast.error('Network error - please check your connection');
+        } catch (e: any) {
+            console.error('❌ Portfolio fetch error:', e);
+            if (e.message?.includes('Failed to fetch')) {
+                toast.error('Network error - please check your connection');
+            } else {
+                toast.error('Error loading portfolio data');
+            }
         } finally {
             setLoading(false);
         }

@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
         email: user.email,
         role: (user as any).role,
         company: (user as any).company,
-        profileImage: (user as any).profileImage,
+        // profileImage removed from token to prevent 431 errors (token too large)
+        // profileImage is still available in the response below
       },
       JWT_SECRET,
       { expiresIn: '24h' }
