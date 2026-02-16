@@ -30,56 +30,75 @@ export default function PortfolioPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (invRes.ok) {
-                const invs = await invRes.json();
-                setInvestments(invs);
+            if (!invRes.ok) {
+                const errorData = await invRes.json().catch(() => ({ message: 'Failed to load investments' }));
+                console.error('Investment fetch error:', errorData);
+                toast.error(errorData.message || 'Failed to load investments');
+                setLoading(false);
+                return;
+            }
 
-                const activeInvs = invs.filter((i: any) => i.status === 'ACTIVE' || i.status === 'PENDING');
-                if (activeInvs.length > 0 && !selectedInvestmentId) {
-                    setSelectedInvestmentId(activeInvs[0].id);
+            const invs = await invRes.json();
+            console.log('Loaded investments:', invs);
+            setInvestments(invs);
+
+            const activeInvs = invs.filter((i: any) => i.status === 'ACTIVE' || i.status === 'PENDING');
+            if (activeInvs.length > 0 && !selectedInvestmentId) {
+                setSelectedInvestmentId(activeInvs[0].id);
+            }
+
+            // 2. Fetch non-critical data
+            const txRes = await fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` } });
+
+            let transactions = [];
+            if (txRes.ok) {
+                transactions = await txRes.json();
+            } else {
+                console.warn('Failed to load transactions');
+            }
+
+            // 3. Try to fetch progress data (optional, may fail for non-admins)
+            try {
+                const progressRes = await fetch('/api/admin/investors/progress', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (progressRes.ok) {
+                    const progressData = await progressRes.json();
+                    setComparativeProgress(progressData);
                 }
+            } catch (progressErr) {
+                console.log('Progress data not available (this is normal for investors)');
+                // Don't show error to user - this is expected for non-admin users
+            }
 
-                // 2. Fetch non-critical data
-                const [txRes, progressRes] = await Promise.all([
-                    fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('/api/admin/investors/progress', { headers: { 'Authorization': `Bearer ${token}` } })
-                ]);
+            const payments = transactions.filter((t: any) => t.type === 'PAYMENT');
 
-                let transactions = [];
-                if (txRes.ok) transactions = await txRes.json();
-                if (progressRes.ok) setComparativeProgress(await progressRes.json());
+            // Select investment: priority to selectedId, then first active/pending, then just first one
+            let currentInv = invs.find((i: any) => i.id === selectedInvestmentId);
+            if (!currentInv) {
+                currentInv = activeInvs.length > 0 ? activeInvs[0] : invs[0];
+                if (currentInv) setSelectedInvestmentId(currentInv.id);
+            }
 
-                const payments = transactions.filter((t: any) => t.type === 'PAYMENT');
+            if (currentInv) {
+                const currentInvPayments = payments.filter((p: any) => p.investmentId === currentInv.id);
+                const currentInvPaid = currentInvPayments.reduce((sum: number, tx: any) => sum + tx.amount, 0);
 
-                // Select investment: priority to selectedId, then first active/pending, then just first one
-                let currentInv = invs.find((i: any) => i.id === selectedInvestmentId);
-                if (!currentInv) {
-                    currentInv = activeInvs.length > 0 ? activeInvs[0] : invs[0];
-                    if (currentInv) setSelectedInvestmentId(currentInv.id);
-                }
+                const startDate = new Date(currentInv.startDate || new Date());
+                const maturityDate = new Date(currentInv.maturityDate || new Date());
+                const durationMonths = Math.max(1, (maturityDate.getFullYear() - startDate.getFullYear()) * 12 + (maturityDate.getMonth() - startDate.getMonth()));
 
-                if (currentInv) {
-                    const currentInvPayments = payments.filter((p: any) => p.investmentId === currentInv.id);
-                    const currentInvPaid = currentInvPayments.reduce((sum: number, tx: any) => sum + tx.amount, 0);
-
-                    const startDate = new Date(currentInv.startDate || new Date());
-                    const maturityDate = new Date(currentInv.maturityDate || new Date());
-                    const durationMonths = Math.max(1, (maturityDate.getFullYear() - startDate.getFullYear()) * 12 + (maturityDate.getMonth() - startDate.getMonth()));
-
-                    setStats({
-                        investment: currentInv,
-                        totalPaid: currentInvPaid,
-                        progress: currentInv.amount > 0 ? Math.min(Math.round((currentInvPaid / currentInv.amount) * 100 * 10) / 10, 100) : 0,
-                        monthlyRequirement: currentInv.amount / durationMonths,
-                        durationYears: Math.round(durationMonths / 12)
-                    });
-                } else {
-                    setStats(null);
-                }
+                setStats({
+                    investment: currentInv,
+                    totalPaid: currentInvPaid,
+                    progress: currentInv.amount > 0 ? Math.min(Math.round((currentInvPaid / currentInv.amount) * 100 * 10) / 10, 100) : 0,
+                    monthlyRequirement: currentInv.amount / durationMonths,
+                    durationYears: Math.round(durationMonths / 12)
+                });
+            } else {
+                setStats(null);
             }
         } catch (e) {
-            console.error(e);
-            toast.error('Failed to sync data');
+            console.error('Portfolio data fetch error:', e);
+            toast.error('Network error - please check your connection');
         } finally {
             setLoading(false);
         }
@@ -158,7 +177,7 @@ export default function PortfolioPage() {
                         <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">Real-time installment tracking & progress analysis</p>
                     </div>
                     <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-white/10 transition-all">
-                        <RefreshCw className="w-4 h-4" /> Sync Stats
+                        <RefreshCw className="w-4 h-4" /> Refresh Data
                     </button>
                 </div>
 
