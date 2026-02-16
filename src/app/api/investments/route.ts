@@ -61,7 +61,13 @@ export async function GET(request: NextRequest) {
 
                 // Months elapsed
                 const monthsElapsed = Math.max(1, Math.floor((now.getTime() - inv.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
-                const monthlyGoal = inv.amount / 60;
+
+                // Calculate duration in months
+                const start = inv.startDate;
+                const end = inv.maturityDate || new Date(new Date(start).setFullYear(start.getFullYear() + 5));
+                const durationMonths = Math.max(1, (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()));
+
+                const monthlyGoal = inv.amount / durationMonths;
                 const totalGoalSoFar = monthlyGoal * monthsElapsed;
                 const totalPaid = inv.transactions.reduce((sum: number, tx: any) => sum + tx.amount, 0);
 
@@ -132,7 +138,13 @@ export async function POST(request: NextRequest) {
 
         const start = startDate ? new Date(startDate) : new Date();
         const maturity = new Date(start);
-        maturity.setFullYear(maturity.getFullYear() + 5);
+
+        if (assetType === 'Fundraising') {
+            maturity.setFullYear(maturity.getFullYear() + 5);
+        } else {
+            // Default and Development are now 1 year as requested
+            maturity.setFullYear(maturity.getFullYear() + 1);
+        }
 
         // If status is PENDING but start date is today or past, make it ACTIVE
         const endOfToday = new Date();

@@ -31,9 +31,9 @@ export default function ManageInvestors() {
     const [editingInvestment, setEditingInvestment] = useState<any>(null); // If not null, we are updating
     const [investmentForm, setInvestmentForm] = useState({
         title: '',
-        amount: '',
+        amount: '1200000',
         roi: '',
-        maturityDate: '',
+        maturityDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
         startDate: new Date().toISOString().split('T')[0],
         status: 'PENDING',
         assetType: 'Development'
@@ -495,14 +495,22 @@ export default function ManageInvestors() {
                                     </div>
                                     {investmentForm.amount && (
                                         <div className="bg-blue-600/5 border border-blue-500/20 p-4 rounded-xl">
-                                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1.5">Auto-Calculated Monthly Payment</p>
+                                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1.5">
+                                                {investmentForm.assetType === 'Development' ? 'Fixed Monthly Payment' : 'Auto-Calculated Monthly Payment'}
+                                            </p>
                                             <div className="flex items-baseline gap-1">
                                                 <span className="text-xl font-bold text-slate-900 dark:text-white">
-                                                    RWF {(parseFloat(investmentForm.amount) / 60).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    RWF {investmentForm.assetType === 'Development'
+                                                        ? (100000).toLocaleString()
+                                                        : (parseFloat(investmentForm.amount) / 60).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                                 </span>
                                                 <span className="text-xs text-slate-500 font-medium">/ month</span>
                                             </div>
-                                            <p className="text-[9px] text-slate-400 mt-2 font-medium italic">* Based on a mandatory 5-year (60 months) timeline.</p>
+                                            <p className="text-[9px] text-slate-400 mt-2 font-medium italic">
+                                                {investmentForm.assetType === 'Development'
+                                                    ? '* Fixed rate for development assets (1-year term).'
+                                                    : '* Based on a 5-year (60 months) fundraising timeline.'}
+                                            </p>
                                         </div>
                                     )}
                                     <div className="grid grid-cols-2 gap-3">
@@ -512,12 +520,18 @@ export default function ManageInvestors() {
                                                 value={investmentForm.startDate} onChange={e => {
                                                     const start = e.target.value;
                                                     const maturity = new Date(start);
-                                                    maturity.setFullYear(maturity.getFullYear() + 5);
+                                                    if (investmentForm.assetType === 'Fundraising') {
+                                                        maturity.setFullYear(maturity.getFullYear() + 5);
+                                                    } else {
+                                                        maturity.setFullYear(maturity.getFullYear() + 1);
+                                                    }
                                                     setInvestmentForm({ ...investmentForm, startDate: start, maturityDate: maturity.toISOString().split('T')[0] });
                                                 }} />
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">Maturity (5Y)</label>
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">
+                                                Maturity {investmentForm.assetType === 'Fundraising' ? '(5Y)' : '(1Y)'}
+                                            </label>
                                             <input type="date" disabled className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs text-slate-400 dark:text-slate-500 cursor-not-allowed"
                                                 value={investmentForm.maturityDate} />
                                         </div>
@@ -527,7 +541,27 @@ export default function ManageInvestors() {
                                         <select
                                             className="w-full bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/10 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                                             value={investmentForm.assetType}
-                                            onChange={e => setInvestmentForm({ ...investmentForm, assetType: e.target.value })}
+                                            onChange={e => {
+                                                const type = e.target.value;
+                                                const start = investmentForm.startDate;
+                                                const maturity = new Date(start);
+                                                let amount = investmentForm.amount;
+
+                                                if (type === 'Fundraising') {
+                                                    maturity.setFullYear(maturity.getFullYear() + 5);
+                                                    amount = '100000000';
+                                                } else {
+                                                    maturity.setFullYear(maturity.getFullYear() + 1);
+                                                    amount = '1200000';
+                                                }
+
+                                                setInvestmentForm({
+                                                    ...investmentForm,
+                                                    assetType: type,
+                                                    amount: amount,
+                                                    maturityDate: maturity.toISOString().split('T')[0]
+                                                });
+                                            }}
                                         >
                                             <option value="Development">Development</option>
                                             <option value="Fundraising">Fundraising</option>

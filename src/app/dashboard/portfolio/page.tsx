@@ -62,11 +62,16 @@ export default function PortfolioPage() {
                     const currentInvPayments = payments.filter((p: any) => p.investmentId === currentInv.id);
                     const currentInvPaid = currentInvPayments.reduce((sum: number, tx: any) => sum + tx.amount, 0);
 
+                    const startDate = new Date(currentInv.startDate || new Date());
+                    const maturityDate = new Date(currentInv.maturityDate || new Date());
+                    const durationMonths = Math.max(1, (maturityDate.getFullYear() - startDate.getFullYear()) * 12 + (maturityDate.getMonth() - startDate.getMonth()));
+
                     setStats({
                         investment: currentInv,
                         totalPaid: currentInvPaid,
                         progress: currentInv.amount > 0 ? Math.min(Math.round((currentInvPaid / currentInv.amount) * 100 * 10) / 10, 100) : 0,
-                        monthlyRequirement: currentInv.amount / 60
+                        monthlyRequirement: currentInv.amount / durationMonths,
+                        durationYears: Math.round(durationMonths / 12)
                     });
                 } else {
                     setStats(null);
@@ -217,7 +222,7 @@ export default function PortfolioPage() {
                                         </div>
                                         <div className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
                                             <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Timeline</span>
-                                            <p className="text-lg font-bold">5 Years</p>
+                                            <p className="text-lg font-bold">{stats?.durationYears || 5} Years</p>
                                         </div>
                                         <div className="hidden md:block bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
                                             <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Asset Category</span>
