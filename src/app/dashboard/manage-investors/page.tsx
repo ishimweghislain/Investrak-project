@@ -531,10 +531,10 @@ export default function ManageInvestors() {
 
                         {/* Notification Panel */}
                         {isSendingNotification && (
-                            <div className="mb-6 bg-blue-900/10 border border-blue-500/20 p-4 rounded-xl animate-in slide-in-from-top-2">
-                                <h3 className="text-sm font-bold text-blue-400 mb-2">Send Secure Alert</h3>
+                            <div className="mb-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-xl animate-in slide-in-from-top-2">
+                                <h3 className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-2">Send Secure Alert</h3>
                                 <form onSubmit={handleSendNotification} className="flex gap-2">
-                                    <input autoFocus type="text" className="flex-1 bg-[#0d1117] border border-white/10 rounded-lg px-3 text-sm focus:border-blue-500/50 outline-none"
+                                    <input autoFocus type="text" className="flex-1 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-lg px-3 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none"
                                         placeholder="Message content..." value={notificationMessage} onChange={e => setNotificationMessage(e.target.value)} required />
                                     <button className="bg-blue-600 hover:bg-blue-500 px-4 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors text-white">
                                         <Send className="w-3 h-3" /> Send
@@ -545,16 +545,16 @@ export default function ManageInvestors() {
 
                         {/* Payment Recording Panel */}
                         {isRecordingPayment && (
-                            <div className="mb-6 bg-green-900/10 border border-green-500/20 p-5 rounded-xl animate-in slide-in-from-top-2">
-                                <h3 className="text-sm font-bold text-green-400 mb-3 flex items-center gap-2">
+                            <div className="mb-6 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-500/20 p-5 rounded-xl animate-in slide-in-from-top-2">
+                                <h3 className="text-sm font-bold text-green-700 dark:text-green-400 mb-3 flex items-center gap-2">
                                     <Receipt className="w-4 h-4" />
                                     Record Manual Payment
                                 </h3>
                                 <form onSubmit={handleRecordPayment} className="space-y-3">
                                     <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Target Investment</label>
+                                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Target Investment</label>
                                         <select
-                                            className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                            className="w-full bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-green-500/50 outline-none"
                                             value={paymentRecordForm.investmentId}
                                             onChange={e => setPaymentRecordForm({ ...paymentRecordForm, investmentId: e.target.value })}
                                             required
@@ -569,10 +569,10 @@ export default function ManageInvestors() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Amount (RWF)</label>
+                                            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Amount (RWF)</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                                className="w-full bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-green-500/50 outline-none"
                                                 placeholder="100000"
                                                 value={paymentRecordForm.amount}
                                                 onChange={e => setPaymentRecordForm({ ...paymentRecordForm, amount: e.target.value })}
@@ -580,10 +580,10 @@ export default function ManageInvestors() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Payment Date</label>
+                                            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Payment Date</label>
                                             <input
                                                 type="date"
-                                                className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                                className="w-full bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-green-500/50 outline-none"
                                                 value={paymentRecordForm.date}
                                                 onChange={e => setPaymentRecordForm({ ...paymentRecordForm, date: e.target.value })}
                                                 required
@@ -591,9 +591,9 @@ export default function ManageInvestors() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Payment Method</label>
+                                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Payment Method</label>
                                         <select
-                                            className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                            className="w-full bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-green-500/50 outline-none"
                                             value={paymentRecordForm.paymentMethod}
                                             onChange={e => setPaymentRecordForm({ ...paymentRecordForm, paymentMethod: e.target.value })}
                                         >
@@ -605,10 +605,10 @@ export default function ManageInvestors() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Description (Optional)</label>
+                                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Description (Optional)</label>
                                         <input
                                             type="text"
-                                            className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                            className="w-full bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-green-500/50 outline-none"
                                             placeholder="e.g., Cash payment received at office"
                                             value={paymentRecordForm.description}
                                             onChange={e => setPaymentRecordForm({ ...paymentRecordForm, description: e.target.value })}
