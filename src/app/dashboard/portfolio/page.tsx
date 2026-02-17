@@ -10,6 +10,7 @@ export default function PortfolioPage() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
     const [investments, setInvestments] = useState<any[]>([]);
+    const [transactions, setTransactions] = useState<any[]>([]);
     const [comparativeProgress, setComparativeProgress] = useState<any[]>([]);
     const [selectedInvestmentId, setSelectedInvestmentId] = useState<string>('');
     const [paymentMethod, setPaymentMethod] = useState('');
@@ -67,6 +68,7 @@ export default function PortfolioPage() {
             let transactions = [];
             if (txRes.ok) {
                 transactions = await txRes.json();
+                setTransactions(transactions);
                 console.log('✅ Loaded transactions:', transactions.length, 'items');
             } else {
                 console.warn('⚠️ Failed to load transactions');
@@ -254,6 +256,18 @@ export default function PortfolioPage() {
                                         </div>
                                         <div className="w-full h-4 bg-black/20 rounded-full p-1 overflow-hidden">
                                             <div className="h-full bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-1000" style={{ width: `${stats?.progress}%` }}></div>
+                                        </div>
+
+                                        {/* Payment Breakdown */}
+                                        <div className="grid grid-cols-2 gap-3 pt-2">
+                                            <div className="bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/5">
+                                                <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Total Paid</span>
+                                                <p className="text-lg font-bold text-green-300">RWF {stats?.totalPaid.toLocaleString()}</p>
+                                            </div>
+                                            <div className="bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/5">
+                                                <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest block mb-1">Remaining</span>
+                                                <p className="text-lg font-bold text-orange-300">RWF {(stats?.investment?.amount - stats?.totalPaid).toLocaleString()}</p>
+                                            </div>
                                         </div>
                                     </div>
 
