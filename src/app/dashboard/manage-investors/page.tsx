@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft, TrendingUp, DollarSign, Calendar, Save, Bell, Send, Wallet } from 'lucide-react';
+import { LogOut, User, Plus, X, Building2, Shield, Loader2, Edit2, Trash2, ArrowLeft, TrendingUp, DollarSign, Calendar, Save, Bell, Send, Wallet, Receipt } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ManageInvestors() {
@@ -42,6 +42,15 @@ export default function ManageInvestors() {
     // Notification Form
     const [isSendingNotification, setIsSendingNotification] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
+
+    // Payment Recording Form
+    const [isRecordingPayment, setIsRecordingPayment] = useState(false);
+    const [paymentRecordForm, setPaymentRecordForm] = useState({
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        description: '',
+        paymentMethod: 'manual'
+    });
 
     const [submitting, setSubmitting] = useState(false);
 
@@ -322,6 +331,60 @@ export default function ManageInvestors() {
         }
     };
 
+    // Payment Recording Logic
+    const handleRecordPayment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!paymentRecordForm.amount || parseFloat(paymentRecordForm.amount) <= 0) {
+            toast.error('Please enter a valid amount');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        const toastId = toast.loading('Recording payment...');
+
+        try {
+            // Find an active investment for this investor
+            const activeInvestment = userInvestments.find(inv => inv.status === 'ACTIVE') || userInvestments[0];
+
+            if (!activeInvestment) {
+                toast.error('No investment found for this investor', { id: toastId });
+                return;
+            }
+
+            const res = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    type: 'PAYMENT',
+                    amount: parseFloat(paymentRecordForm.amount),
+                    status: 'COMPLETED',
+                    description: paymentRecordForm.description || `Manual payment recorded by admin via ${paymentRecordForm.paymentMethod}`,
+                    userId: selectedInvestor.id,
+                    investmentId: activeInvestment.id,
+                    date: paymentRecordForm.date
+                })
+            });
+
+            if (res.ok) {
+                toast.success('Payment recorded successfully!', { id: toastId });
+                setPaymentRecordForm({
+                    amount: '',
+                    date: new Date().toISOString().split('T')[0],
+                    description: '',
+                    paymentMethod: 'manual'
+                });
+                setIsRecordingPayment(false);
+                // Refresh investments to show updated progress
+                await openInvestmentsModal(selectedInvestor);
+            } else {
+                const error = await res.json();
+                toast.error(error.message || 'Failed to record payment', { id: toastId });
+            }
+        } catch (e) {
+            toast.error('Network error', { id: toastId });
+        }
+    };
+
     const resetForm = () => {
         setFormData({ username: '', company: '', password: '', email: '', profileImage: '' });
         setSelectedInvestor(null);
@@ -444,6 +507,9 @@ export default function ManageInvestors() {
                                 <p className="text-slate-500 dark:text-slate-400 text-sm">Managing assets for <span className="text-blue-600 dark:text-blue-400">{selectedInvestor?.username}</span></p>
                             </div>
                             <div className="flex items-center gap-2">
+                                <button onClick={() => setIsRecordingPayment(!isRecordingPayment)} className={`p-2 rounded-full transition-colors ${isRecordingPayment ? 'bg-green-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
+                                    <Receipt className="w-5 h-5" />
+                                </button>
                                 <button onClick={() => setIsSendingNotification(!isSendingNotification)} className={`p-2 rounded-full transition-colors ${isSendingNotification ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
                                     <Bell className="w-5 h-5" />
                                 </button>
@@ -462,6 +528,68 @@ export default function ManageInvestors() {
                                         placeholder="Message content..." value={notificationMessage} onChange={e => setNotificationMessage(e.target.value)} required />
                                     <button className="bg-blue-600 hover:bg-blue-500 px-4 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors text-white">
                                         <Send className="w-3 h-3" /> Send
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Payment Recording Panel */}
+                        {isRecordingPayment && (
+                            <div className="mb-6 bg-green-900/10 border border-green-500/20 p-5 rounded-xl animate-in slide-in-from-top-2">
+                                <h3 className="text-sm font-bold text-green-400 mb-3 flex items-center gap-2">
+                                    <Receipt className="w-4 h-4" />
+                                    Record Manual Payment
+                                </h3>
+                                <form onSubmit={handleRecordPayment} className="space-y-3">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Amount (RWF)</label>
+                                            <input
+                                                type="number"
+                                                className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                                placeholder="100000"
+                                                value={paymentRecordForm.amount}
+                                                onChange={e => setPaymentRecordForm({ ...paymentRecordForm, amount: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Payment Date</label>
+                                            <input
+                                                type="date"
+                                                className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                                value={paymentRecordForm.date}
+                                                onChange={e => setPaymentRecordForm({ ...paymentRecordForm, date: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Payment Method</label>
+                                        <select
+                                            className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                            value={paymentRecordForm.paymentMethod}
+                                            onChange={e => setPaymentRecordForm({ ...paymentRecordForm, paymentMethod: e.target.value })}
+                                        >
+                                            <option value="manual">Manual/Cash</option>
+                                            <option value="bank_transfer">Bank Transfer</option>
+                                            <option value="momo">Mobile Money</option>
+                                            <option value="check">Check</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Description (Optional)</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                            placeholder="e.g., Cash payment received at office"
+                                            value={paymentRecordForm.description}
+                                            onChange={e => setPaymentRecordForm({ ...paymentRecordForm, description: e.target.value })}
+                                        />
+                                    </div>
+                                    <button type="submit" className="w-full bg-green-600 hover:bg-green-500 px-4 py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors text-white">
+                                        <Receipt className="w-4 h-4" /> Record Payment
                                     </button>
                                 </form>
                             </div>
