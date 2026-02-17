@@ -103,18 +103,36 @@ export async function GET(request: NextRequest) {
             if (userId) {
                 investments = await prisma.investment.findMany({
                     where: { userId },
-                    include: { user: { select: { username: true, firstName: true, lastName: true } } },
+                    include: {
+                        user: { select: { username: true, firstName: true, lastName: true } },
+                        transactions: {
+                            where: { type: 'PAYMENT', status: 'COMPLETED' },
+                            select: { amount: true }
+                        }
+                    },
                     orderBy: { createdAt: 'desc' }
                 });
             } else {
                 investments = await prisma.investment.findMany({
-                    include: { user: { select: { username: true, firstName: true, lastName: true } } },
+                    include: {
+                        user: { select: { username: true, firstName: true, lastName: true } },
+                        transactions: {
+                            where: { type: 'PAYMENT', status: 'COMPLETED' },
+                            select: { amount: true }
+                        }
+                    },
                     orderBy: { createdAt: 'desc' }
                 });
             }
         } else {
             investments = await prisma.investment.findMany({
                 where: { userId: user.id },
+                include: {
+                    transactions: {
+                        where: { type: 'PAYMENT', status: 'COMPLETED' },
+                        select: { amount: true }
+                    }
+                },
                 orderBy: { createdAt: 'desc' }
             });
         }

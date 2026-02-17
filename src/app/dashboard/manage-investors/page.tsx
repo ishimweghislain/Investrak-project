@@ -49,10 +49,18 @@ export default function ManageInvestors() {
         amount: '',
         date: new Date().toISOString().split('T')[0],
         description: '',
-        paymentMethod: 'manual'
+        paymentMethod: 'manual',
+        investmentId: ''
     });
 
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (userInvestments.length > 0 && !paymentRecordForm.investmentId) {
+            const active = userInvestments.find(i => i.status === 'ACTIVE') || userInvestments[0];
+            setPaymentRecordForm(prev => ({ ...prev, investmentId: active.id }));
+        }
+    }, [userInvestments]);
 
     useEffect(() => {
         fetchInvestors();
@@ -343,10 +351,11 @@ export default function ManageInvestors() {
         const toastId = toast.loading('Recording payment...');
 
         try {
-            // Find an active investment for this investor
-            const activeInvestment = userInvestments.find(inv => inv.status === 'ACTIVE') || userInvestments[0];
+            // Use selected investment or fallback to first active
+            const targetInvestmentId = paymentRecordForm.investmentId ||
+                (userInvestments.find(inv => inv.status === 'ACTIVE') || userInvestments[0])?.id;
 
-            if (!activeInvestment) {
+            if (!targetInvestmentId) {
                 toast.error('No investment found for this investor', { id: toastId });
                 return;
             }
@@ -360,7 +369,7 @@ export default function ManageInvestors() {
                     status: 'COMPLETED',
                     description: paymentRecordForm.description || `Manual payment recorded by admin via ${paymentRecordForm.paymentMethod}`,
                     userId: selectedInvestor.id,
-                    investmentId: activeInvestment.id,
+                    investmentId: targetInvestmentId,
                     date: paymentRecordForm.date
                 })
             });
@@ -371,7 +380,8 @@ export default function ManageInvestors() {
                     amount: '',
                     date: new Date().toISOString().split('T')[0],
                     description: '',
-                    paymentMethod: 'manual'
+                    paymentMethod: 'manual',
+                    investmentId: paymentRecordForm.investmentId // Keep the selected investment
                 });
                 setIsRecordingPayment(false);
                 // Refresh investments to show updated progress
@@ -541,6 +551,22 @@ export default function ManageInvestors() {
                                     Record Manual Payment
                                 </h3>
                                 <form onSubmit={handleRecordPayment} className="space-y-3">
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Target Investment</label>
+                                        <select
+                                            className="w-full bg-[#0d1117] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-green-500/50 outline-none text-white"
+                                            value={paymentRecordForm.investmentId}
+                                            onChange={e => setPaymentRecordForm({ ...paymentRecordForm, investmentId: e.target.value })}
+                                            required
+                                        >
+                                            <option value="">Select Investment...</option>
+                                            {userInvestments.map(inv => (
+                                                <option key={inv.id} value={inv.id}>
+                                                    {inv.title} ({inv.status}) - {inv.assetType}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
                                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Amount (RWF)</label>
@@ -716,10 +742,28 @@ export default function ManageInvestors() {
                                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inv.status === 'ACTIVE' ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                                                             }`}>{inv.status}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-xs text-slate-400">
-                                                        <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {inv.amount.toLocaleString()}</span>
+                                                    <div className="flex items-center gap-4 text-xs text-slate-400 mt-1">
+                                                        <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {inv.amount.toLocaleString()} Goal</span>
                                                         <span className="flex items-center gap-1"><Wallet className="w-3 h-3" /> {inv.assetType}</span>
                                                         {inv.maturityDate && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(inv.maturityDate).toLocaleDateString()}</span>}
+                                                    </div>
+
+                                                    {/* Progress Bar for Admin */}
+                                                    <div className="mt-2 w-full max-w-[200px]">
+                                                        <div className="flex justify-between text-[10px] font-bold mb-0.5">
+                                                            <span className="text-slate-500">
+                                                                Paid: {((inv.transactions?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0)).toLocaleString()}
+                                                            </span>
+                                                            <span className={((inv.transactions?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0) / inv.amount) >= 1 ? 'text-green-500' : 'text-blue-500'}>
+                                                                {Math.round(((inv.transactions?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0) / inv.amount) * 100)}%
+                                                            </span>
+                                                        </div>
+                                                        <div className="h-1.5 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+                                                            <div
+                                                                className={`h-full rounded-full ${((inv.transactions?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0) / inv.amount) >= 1 ? 'bg-green-500' : 'bg-blue-500'}`}
+                                                                style={{ width: `${Math.min(100, ((inv.transactions?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0) / inv.amount) * 100)}%` }}
+                                                            ></div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-2">
