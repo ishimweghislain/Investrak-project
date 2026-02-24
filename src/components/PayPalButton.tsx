@@ -12,7 +12,7 @@ interface PayPalButtonProps {
 }
 
 export default function PayPalButton({ amount, investmentId, description, onSuccess }: PayPalButtonProps) {
-    const [{ isPending, isResolved, isRejected }, dispatch] = usePayPalScriptReducer();
+    const [{ isPending }] = usePayPalScriptReducer();
     const [debugLogs, setDebugLogs] = useState<string[]>([]);
 
     const addLog = (msg: string) => {
@@ -24,12 +24,7 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
         addLog("PayPalButton Mounted");
     }, []);
 
-    useEffect(() => {
-        if (isPending) addLog("SDK: Loading...");
-        if (isResolved) addLog("SDK: Ready ✅");
-        if (isRejected) addLog("SDK: Failed ❌");
-    }, [isPending, isResolved, isRejected]);
-
+    // Calculate USD (1 USD = 1300 RWF approx)
     const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
     const usdAmount = (parseFloat(sanitizedAmount) / 1300).toFixed(2);
 
@@ -81,6 +76,7 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
                 toast.error(details.message || "Payment failed to capture");
             }
         } catch (error: any) {
+            addLog(`CRITICAL: ${error.message}`);
             toast.error("Error capturing payment");
         }
     };
@@ -89,54 +85,49 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
         <div className="w-full mt-4 space-y-3">
             <div className="flex items-center justify-between px-1">
                 <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-500 uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded-md">
-                    PayPal Sandbox
+                    PayPal Sandbox Mode
                 </span>
                 <span className="text-[10px] font-bold text-slate-500">
                     {usdAmount} USD
                 </span>
             </div>
 
-            <div className="relative min-h-[150px] flex flex-col justify-center">
+            <div className="relative min-h-[50px]">
                 {isPending && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-white/5 rounded-2xl z-20">
-                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent animate-spin rounded-full mb-2"></div>
-                        <span className="text-[10px] text-slate-500 font-bold">Connecting to PayPal...</span>
+                    <div className="w-full h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg flex items-center justify-center">
+                        <span className="text-[10px] text-slate-400 font-bold">Connecting to PayPal...</span>
                     </div>
                 )}
 
-                {isResolved && (
-                    <div className="relative z-10 transition-all duration-500">
-                        <PayPalButtons
-                            style={{ layout: "vertical", shape: "rect", label: "pay" }}
-                            createOrder={createOrder}
-                            onApprove={onApprove}
-                            onError={(err) => addLog(`SDK ERROR: ${err}`)}
-                        />
-                    </div>
-                )}
-
-                {isRejected && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center">
-                        <p className="text-xs text-red-500 font-bold mb-2">PayPal failed to load</p>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="text-[10px] bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold"
-                        >
-                            RETRY PAGE
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            <div className="p-2 bg-black/5 dark:bg-white/5 rounded-xl border border-black/5">
-                <div className="space-y-1">
-                    {debugLogs.map((log, i) => (
-                        <p key={i} className="text-[9px] font-mono text-slate-500 leading-tight">
-                            {log}
-                        </p>
-                    ))}
+                <div className={isPending ? 'hidden' : 'block'}>
+                    <PayPalButtons
+                        style={{ layout: "vertical", shape: "rect", label: "pay" }}
+                        createOrder={createOrder}
+                        onApprove={onApprove}
+                        onError={(err) => addLog(`SDK ERROR: ${err}`)}
+                    />
                 </div>
             </div>
+
+            {/* Test Status Monitor */}
+            <div className="p-3 bg-black/5 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-black/5 pb-1">Test Status Monitor</p>
+                <div className="space-y-1">
+                    {debugLogs.length === 0 ? (
+                        <p className="text-[10px] text-slate-500 italic">Starting up...</p>
+                    ) : (
+                        debugLogs.map((log, i) => (
+                            <p key={i} className={`text-[9px] font-mono leading-tight ${log.includes('ERROR') ? 'text-red-500' : log.includes('SUCCESS') ? 'text-green-500' : 'text-slate-500'}`}>
+                                {log}
+                            </p>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            <p className="text-[10px] text-slate-400 font-medium text-center italic">
+                Use your PayPal Sandbox test account only.
+            </p>
         </div>
     );
 }

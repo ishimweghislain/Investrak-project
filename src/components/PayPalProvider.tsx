@@ -9,11 +9,8 @@ export default function PayPalProvider({ children }: { children: React.ReactNode
     return (
         <PayPalScriptProvider options={{
             clientId: clientId,
-            currency: "USD",
-            intent: "CAPTURE",
-            vault: false
+            currency: "USD"
         }}>
-
             {children}
         </PayPalScriptProvider>
     );
