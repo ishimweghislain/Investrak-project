@@ -1,8 +1,9 @@
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const base = process.env.PAYPAL_MODE === "sandbox"
+const base = (process.env.PAYPAL_MODE || "sandbox") === "sandbox"
     ? "https://api-m.sandbox.paypal.com"
     : "https://api-m.paypal.com";
+
 
 export async function generateAccessToken() {
     if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
@@ -19,9 +20,16 @@ export async function generateAccessToken() {
         },
     });
 
+    if (!response.ok) {
+        const error = await response.json();
+        console.error("PayPal Auth Error:", error);
+        throw new Error(`PayPal Authentication failed: ${error.error_description || response.statusText}`);
+    }
+
     const data = await response.json();
     return data.access_token;
 }
+
 
 export async function createOrder(amount: string) {
     const accessToken = await generateAccessToken();
