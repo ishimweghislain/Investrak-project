@@ -1,7 +1,8 @@
 'use client';
 
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import toast from "react-hot-toast";
 
 interface PayPalButtonProps {
@@ -19,6 +20,20 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
         const time = new Date().toLocaleTimeString();
         setDebugLogs(prev => [`[${time}] ${msg}`, ...prev].slice(0, 10));
     };
+
+    useEffect(() => {
+        addLog("PayPalButton Component Mounted");
+    }, []);
+
+    useEffect(() => {
+
+        if (isPending) {
+            addLog("SDK Status: Loading...");
+        } else {
+            addLog("SDK Status: Ready");
+        }
+    }, [isPending]);
+
 
     const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
     const usdAmount = (parseFloat(sanitizedAmount) / 1300).toFixed(2);
@@ -93,11 +108,17 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
                     <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
                     PayPal Sandbox Active
                 </span>
+                <span className="text-[10px] font-bold text-slate-500">
+                    Calculated: ${usdAmount} USD
+                </span>
             </div>
 
             {isPending ? (
-                <div className="h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg"></div>
+                <div className="h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg flex items-center justify-center">
+                    <span className="text-[10px] text-slate-400 font-bold animate-pulse">Initializing PayPal...</span>
+                </div>
             ) : (
+
                 <div className="relative z-0">
                     <PayPalButtons
                         style={{ layout: "vertical", shape: "rect", label: "pay" }}
@@ -108,6 +129,8 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
                             toast.error("PayPal SDK Error occurred");
                         }}
                     />
+
+
                 </div>
             )}
 
