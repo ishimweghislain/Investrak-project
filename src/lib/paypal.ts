@@ -1,9 +1,9 @@
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const base = (process.env.PAYPAL_MODE || "sandbox") === "sandbox"
+const PAYPAL_MODE = process.env.PAYPAL_MODE || "sandbox";
+const base = PAYPAL_MODE === "sandbox"
     ? "https://api-m.sandbox.paypal.com"
     : "https://api-m.paypal.com";
-
 
 export async function generateAccessToken() {
     if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
@@ -30,7 +30,6 @@ export async function generateAccessToken() {
     return data.access_token;
 }
 
-
 export async function createOrder(amount: string) {
     const accessToken = await generateAccessToken();
     const url = `${base}/v2/checkout/orders`;
@@ -42,20 +41,18 @@ export async function createOrder(amount: string) {
         },
         body: JSON.stringify({
             intent: "CAPTURE",
-            application_context: {
-                shipping_preference: "NO_SHIPPING",
-                user_action: "PAY_NOW",
-                brand_name: "Spark Holding Group",
-            },
             purchase_units: [
                 {
                     amount: {
                         currency_code: "USD",
                         value: amount,
                     },
-                    description: "Portfolio Investment Installment",
+                    description: "Portfolio Investment Payment",
                 },
             ],
+            application_context: {
+                shipping_preference: "NO_SHIPPING"
+            }
         }),
     });
 
@@ -83,4 +80,3 @@ export async function capturePayment(orderId: string) {
     }
     return data;
 }
-

@@ -1,7 +1,6 @@
 'use client';
 
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 interface PayPalButtonProps {
@@ -15,10 +14,13 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
     const [{ isPending }] = usePayPalScriptReducer();
 
     // RWF to USD conversion (approximate rate: 1 USD = 1300 RWF)
-    const usdAmount = (amount / 1300).toFixed(2);
+    // First, remove any commas or spaces from the amount if it's a string
+    const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
+    const usdAmount = (parseFloat(sanitizedAmount) / 1300).toFixed(2);
 
     const createOrder = async () => {
         try {
+            console.log(`Creating order for RWF ${sanitizedAmount} -> USD ${usdAmount}`);
             const response = await fetch("/api/paypal/create-order", {
                 method: "POST",
                 headers: {
@@ -30,10 +32,13 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
             });
 
             const order = await response.json();
+            if (!response.ok) {
+                throw new Error(order.error || "Failed to create order");
+            }
             return order.id;
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to create PayPal order");
+        } catch (error: any) {
+            console.error("Create Order Error:", error);
+            toast.error(error.message || "Failed to create PayPal order");
             throw error;
         }
     };
@@ -49,27 +54,26 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
                 },
                 body: JSON.stringify({
                     orderID: data.orderID,
-                    amount: amount, // Send original RWF amount to save in DB
+                    amount: sanitizedAmount, // Send sanitized RWF amount to save in DB
                     investmentId: investmentId,
                     description: description,
                 }),
             });
 
             const details = await response.json();
-            if (response.ok && details.status === "COMPLETED") {
+            if (response.ok && (details.status === "COMPLETED" || details.status === "APPROVED")) {
                 toast.success("Payment successful!");
                 onSuccess();
             } else {
-                const errorMessage = details.message || details.error || "Payment failed to capture";
+                console.error("PayPal Capture Error Detail:", details);
+                const errorMessage = details.message || (details.details && details.details[0]?.description) || "Payment failed to capture";
                 toast.error(errorMessage);
-                console.error("Capture failure:", details);
             }
         } catch (error) {
-            console.error(error);
+            console.error("Capture Error:", error);
             toast.error("Error capturing PayPal payment");
         }
     };
-
 
     return (
         <div className="w-full mt-4 space-y-3">
@@ -105,4 +109,3 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
         </div>
     );
 }
-
