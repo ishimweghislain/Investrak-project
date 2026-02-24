@@ -2,7 +2,6 @@
 
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useState, useEffect } from "react";
-
 import toast from "react-hot-toast";
 
 interface PayPalButtonProps {
@@ -13,62 +12,49 @@ interface PayPalButtonProps {
 }
 
 export default function PayPalButton({ amount, investmentId, description, onSuccess }: PayPalButtonProps) {
-    const [{ isPending }] = usePayPalScriptReducer();
+    const [{ isPending, isResolved, isRejected }, dispatch] = usePayPalScriptReducer();
     const [debugLogs, setDebugLogs] = useState<string[]>([]);
 
     const addLog = (msg: string) => {
         const time = new Date().toLocaleTimeString();
-        setDebugLogs(prev => [`[${time}] ${msg}`, ...prev].slice(0, 10));
+        setDebugLogs(prev => [`[${time}] ${msg}`, ...prev].slice(0, 5));
     };
 
     useEffect(() => {
-        addLog("PayPalButton Component Mounted");
+        addLog("PayPalButton Mounted");
     }, []);
 
     useEffect(() => {
-
-        if (isPending) {
-            addLog("SDK Status: Loading...");
-        } else {
-            addLog("SDK Status: Ready");
-        }
-    }, [isPending]);
-
+        if (isPending) addLog("SDK: Loading...");
+        if (isResolved) addLog("SDK: Ready ✅");
+        if (isRejected) addLog("SDK: Failed ❌");
+    }, [isPending, isResolved, isRejected]);
 
     const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
     const usdAmount = (parseFloat(sanitizedAmount) / 1300).toFixed(2);
 
     const createOrder = async () => {
         try {
-            addLog(`Step 1: Creating order for $${usdAmount} USD...`);
+            addLog(`Order: Sending $${usdAmount} to API...`);
             const response = await fetch("/api/paypal/create-order", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    amount: usdAmount,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: usdAmount }),
             });
 
             const order = await response.json();
-
-            if (!response.ok) {
-                addLog(`ERROR: Backend returned ${response.status}`);
-                throw new Error(order.error || "Failed to create order");
-            }
-
-            addLog(`Step 2: Order ID received: ${order.id}`);
+            if (!response.ok) throw new Error(order.error || "Failed to create order");
+            addLog(`Order ID: ${order.id}`);
             return order.id;
         } catch (error: any) {
-            addLog(`CRITICAL ERROR: ${error.message}`);
-            toast.error(error.message || "Failed to create PayPal order");
+            addLog(`ERROR: ${error.message}`);
+            toast.error(error.message);
             throw error;
         }
     };
 
     const onApprove = async (data: any) => {
-        addLog(`Step 3: Payment Approved! Capturing ${data.orderID}...`);
+        addLog("Payment Approved, Capturing...");
         const token = localStorage.getItem('token');
         try {
             const response = await fetch("/api/paypal/capture-order", {
@@ -87,17 +73,15 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
 
             const details = await response.json();
             if (response.ok && (details.status === "COMPLETED" || details.status === "APPROVED")) {
-                addLog(`Step 4: SUCCESS! Payment captured.`);
+                addLog("SUCCESS!");
                 toast.success("Payment successful!");
                 onSuccess();
             } else {
-                addLog(`ERROR: Capture failed: ${details.message}`);
-                const errorMessage = details.message || "Payment failed to capture";
-                toast.error(errorMessage);
+                addLog(`ERROR: ${details.message || 'Capture failed'}`);
+                toast.error(details.message || "Payment failed to capture");
             }
         } catch (error: any) {
-            addLog(`CRITICAL ERROR: ${error.message}`);
-            toast.error("Error capturing PayPal payment");
+            toast.error("Error capturing payment");
         }
     };
 
@@ -105,54 +89,54 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
         <div className="w-full mt-4 space-y-3">
             <div className="flex items-center justify-between px-1">
                 <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-500 uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                    PayPal Sandbox Active
+                    PayPal Sandbox
                 </span>
                 <span className="text-[10px] font-bold text-slate-500">
-                    Calculated: ${usdAmount} USD
+                    {usdAmount} USD
                 </span>
             </div>
 
-            {isPending ? (
-                <div className="h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg flex items-center justify-center">
-                    <span className="text-[10px] text-slate-400 font-bold animate-pulse">Initializing PayPal...</span>
-                </div>
-            ) : (
+            <div className="relative min-h-[150px] flex flex-col justify-center">
+                {isPending && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-white/5 rounded-2xl z-20">
+                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent animate-spin rounded-full mb-2"></div>
+                        <span className="text-[10px] text-slate-500 font-bold">Connecting to PayPal...</span>
+                    </div>
+                )}
 
-                <div className="relative z-0">
-                    <PayPalButtons
-                        style={{ layout: "vertical", shape: "rect", label: "pay" }}
-                        createOrder={createOrder}
-                        onApprove={onApprove}
-                        onError={(err) => {
-                            addLog(`SDK ERROR: ${err.toString()}`);
-                            toast.error("PayPal SDK Error occurred");
-                        }}
-                    />
+                {isResolved && (
+                    <div className="relative z-10 transition-all duration-500">
+                        <PayPalButtons
+                            style={{ layout: "vertical", shape: "rect", label: "pay" }}
+                            createOrder={createOrder}
+                            onApprove={onApprove}
+                            onError={(err) => addLog(`SDK ERROR: ${err}`)}
+                        />
+                    </div>
+                )}
 
-
-                </div>
-            )}
-
-            {/* Debug Monitor for checking status on-screen */}
-            <div className="p-3 bg-black/5 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-black/5 pb-1">Test Status Monitor</p>
-                <div className="space-y-1 max-h-32 overflow-y-auto no-scrollbar">
-                    {debugLogs.length === 0 ? (
-                        <p className="text-[10px] text-slate-500 italic">No activity yet. Click the PayPal button above.</p>
-                    ) : (
-                        debugLogs.map((log, i) => (
-                            <p key={i} className={`text-[9px] font-mono leading-tight ${log.includes('ERROR') ? 'text-red-500' : log.includes('SUCCESS') ? 'text-green-500' : 'text-slate-500'}`}>
-                                {log}
-                            </p>
-                        ))
-                    )}
-                </div>
+                {isRejected && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center">
+                        <p className="text-xs text-red-500 font-bold mb-2">PayPal failed to load</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-[10px] bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold"
+                        >
+                            RETRY PAGE
+                        </button>
+                    </div>
+                )}
             </div>
 
-            <p className="text-[10px] text-slate-400 font-medium text-center italic">
-                Use your PayPal Sandbox test account only.
-            </p>
+            <div className="p-2 bg-black/5 dark:bg-white/5 rounded-xl border border-black/5">
+                <div className="space-y-1">
+                    {debugLogs.map((log, i) => (
+                        <p key={i} className="text-[9px] font-mono text-slate-500 leading-tight">
+                            {log}
+                        </p>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
