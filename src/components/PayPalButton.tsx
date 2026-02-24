@@ -96,6 +96,11 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
                 <div className="h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg"></div>
             ) : (
                 <div className="relative z-0">
+                    {!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
+                        <div className="p-2 mb-2 bg-red-500/10 border border-red-500/20 rounded text-[10px] text-red-500 font-bold">
+                            ⚠️ ERROR: Client ID not found. Restart your terminal (npm run dev)!
+                        </div>
+                    )}
                     <PayPalButtons
                         style={{ layout: "vertical", shape: "rect", label: "pay" }}
                         createOrder={createOrder}
@@ -103,6 +108,7 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
                     />
                 </div>
             )}
+
             <p className="text-[10px] text-slate-400 font-medium text-center">
                 Use your PayPal Developer sandbox account to test. No real money will be charged.
             </p>
