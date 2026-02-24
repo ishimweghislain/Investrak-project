@@ -1,6 +1,7 @@
 'use client';
 
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 interface PayPalButtonProps {
@@ -12,15 +13,19 @@ interface PayPalButtonProps {
 
 export default function PayPalButton({ amount, investmentId, description, onSuccess }: PayPalButtonProps) {
     const [{ isPending }] = usePayPalScriptReducer();
+    const [debugLogs, setDebugLogs] = useState<string[]>([]);
 
-    // RWF to USD conversion (approximate rate: 1 USD = 1300 RWF)
-    // First, remove any commas or spaces from the amount if it's a string
+    const addLog = (msg: string) => {
+        const time = new Date().toLocaleTimeString();
+        setDebugLogs(prev => [`[${time}] ${msg}`, ...prev].slice(0, 10));
+    };
+
     const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
     const usdAmount = (parseFloat(sanitizedAmount) / 1300).toFixed(2);
 
     const createOrder = async () => {
         try {
-            console.log(`Creating order for RWF ${sanitizedAmount} -> USD ${usdAmount}`);
+            addLog(`Step 1: Creating order for $${usdAmount} USD...`);
             const response = await fetch("/api/paypal/create-order", {
                 method: "POST",
                 headers: {
@@ -32,18 +37,23 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
             });
 
             const order = await response.json();
+
             if (!response.ok) {
+                addLog(`ERROR: Backend returned ${response.status}`);
                 throw new Error(order.error || "Failed to create order");
             }
+
+            addLog(`Step 2: Order ID received: ${order.id}`);
             return order.id;
         } catch (error: any) {
-            console.error("Create Order Error:", error);
+            addLog(`CRITICAL ERROR: ${error.message}`);
             toast.error(error.message || "Failed to create PayPal order");
             throw error;
         }
     };
 
     const onApprove = async (data: any) => {
+        addLog(`Step 3: Payment Approved! Capturing ${data.orderID}...`);
         const token = localStorage.getItem('token');
         try {
             const response = await fetch("/api/paypal/capture-order", {
@@ -54,7 +64,7 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
                 },
                 body: JSON.stringify({
                     orderID: data.orderID,
-                    amount: sanitizedAmount, // Send sanitized RWF amount to save in DB
+                    amount: sanitizedAmount,
                     investmentId: investmentId,
                     description: description,
                 }),
@@ -62,15 +72,16 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
 
             const details = await response.json();
             if (response.ok && (details.status === "COMPLETED" || details.status === "APPROVED")) {
+                addLog(`Step 4: SUCCESS! Payment captured.`);
                 toast.success("Payment successful!");
                 onSuccess();
             } else {
-                console.error("PayPal Capture Error Detail:", details);
-                const errorMessage = details.message || (details.details && details.details[0]?.description) || "Payment failed to capture";
+                addLog(`ERROR: Capture failed: ${details.message}`);
+                const errorMessage = details.message || "Payment failed to capture";
                 toast.error(errorMessage);
             }
-        } catch (error) {
-            console.error("Capture Error:", error);
+        } catch (error: any) {
+            addLog(`CRITICAL ERROR: ${error.message}`);
             toast.error("Error capturing PayPal payment");
         }
     };
@@ -80,37 +91,44 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
             <div className="flex items-center justify-between px-1">
                 <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-500 uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded-md">
                     <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                    PayPal Sandbox Mode
+                    PayPal Sandbox Active
                 </span>
-                <a
-                    href="https://developer.paypal.com/dashboard/accounts"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[10px] font-bold text-blue-500 hover:underline"
-                >
-                    Get Test Accounts →
-                </a>
             </div>
 
             {isPending ? (
                 <div className="h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg"></div>
             ) : (
                 <div className="relative z-0">
-                    {!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
-                        <div className="p-2 mb-2 bg-red-500/10 border border-red-500/20 rounded text-[10px] text-red-500 font-bold">
-                            ⚠️ ERROR: Client ID not found. Restart your terminal (npm run dev)!
-                        </div>
-                    )}
                     <PayPalButtons
                         style={{ layout: "vertical", shape: "rect", label: "pay" }}
                         createOrder={createOrder}
                         onApprove={onApprove}
+                        onError={(err) => {
+                            addLog(`SDK ERROR: ${err.toString()}`);
+                            toast.error("PayPal SDK Error occurred");
+                        }}
                     />
                 </div>
             )}
 
-            <p className="text-[10px] text-slate-400 font-medium text-center">
-                Use your PayPal Developer sandbox account to test. No real money will be charged.
+            {/* Debug Monitor for checking status on-screen */}
+            <div className="p-3 bg-black/5 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-black/5 pb-1">Test Status Monitor</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto no-scrollbar">
+                    {debugLogs.length === 0 ? (
+                        <p className="text-[10px] text-slate-500 italic">No activity yet. Click the PayPal button above.</p>
+                    ) : (
+                        debugLogs.map((log, i) => (
+                            <p key={i} className={`text-[9px] font-mono leading-tight ${log.includes('ERROR') ? 'text-red-500' : log.includes('SUCCESS') ? 'text-green-500' : 'text-slate-500'}`}>
+                                {log}
+                            </p>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            <p className="text-[10px] text-slate-400 font-medium text-center italic">
+                Use your PayPal Sandbox test account only.
             </p>
         </div>
     );

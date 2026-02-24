@@ -3,7 +3,10 @@ import { capturePayment } from "@/lib/paypal";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
+
     const user = await verifyAuth(request);
     if (!user) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

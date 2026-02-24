@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder } from "@/lib/paypal";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
     try {
         const { amount } = await request.json();
@@ -16,7 +18,6 @@ export async function POST(request: NextRequest) {
         console.log(`Order created successfully: ${order.id}`);
         return NextResponse.json(order);
     } catch (error: any) {
-
         console.error("PayPal Create Order Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

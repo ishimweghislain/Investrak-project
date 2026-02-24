@@ -1,12 +1,8 @@
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+const PAYPAL_CLIENT_ID = "AWwod6PO6_rdzONzxn4ftKHQyp9aiCseRnBBSFxvapkbkd9NXBiOM3T1WEnrS98kiZdgpYSVNxXsvQd4";
+const PAYPAL_CLIENT_SECRET = "EMcS5JPhOCMcpmSu0xo1e8udMg0THxPXCoCrnyzHfg8eXxJqWOih2F8QRM2y6XPqvRb45hc5yn0GjdK5";
 const base = "https://api-m.sandbox.paypal.com";
 
 export async function generateAccessToken() {
-    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
-        throw new Error("PayPal Client ID or Secret is missing in Server Env");
-    }
-
     const auth = Buffer.from(PAYPAL_CLIENT_ID + ":" + PAYPAL_CLIENT_SECRET).toString("base64");
     const response = await fetch(`${base}/v1/oauth2/token`, {
         method: "POST",
@@ -29,32 +25,38 @@ export async function generateAccessToken() {
 export async function createOrder(amount: string) {
     const accessToken = await generateAccessToken();
     const url = `${base}/v2/checkout/orders`;
-
-    // Ensure amount is exactly 2 decimal places and a string
     const formattedAmount = parseFloat(amount).toFixed(2);
+
+    const body = JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [
+            {
+                amount: {
+                    currency_code: "USD",
+                    value: formattedAmount,
+                },
+                description: "Portfolio Investment"
+            }
+        ],
+        application_context: {
+            shipping_preference: "NO_SHIPPING",
+            user_action: "PAY_NOW"
+        }
+    });
 
     const response = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
+            "PayPal-Request-Id": Date.now().toString()
         },
-        body: JSON.stringify({
-            intent: "CAPTURE",
-            purchase_units: [
-                {
-                    amount: {
-                        currency_code: "USD",
-                        value: formattedAmount,
-                    }
-                }
-            ]
-        }),
+        body: body,
     });
 
     const data = await response.json();
     if (!response.ok) {
-        console.error("PayPal Order Error:", data);
+        console.error("PayPal API Error Response:", data);
     }
     return data;
 }
@@ -72,7 +74,7 @@ export async function capturePayment(orderId: string) {
 
     const data = await response.json();
     if (!response.ok) {
-        console.error("PayPal Capture Error:", data);
+        console.error("PayPal Capture Error Response:", data);
     }
     return data;
 }

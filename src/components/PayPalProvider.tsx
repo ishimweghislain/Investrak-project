@@ -3,14 +3,17 @@
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 export default function PayPalProvider({ children }: { children: React.ReactNode }) {
-    const initialOptions = {
-        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
-        currency: "USD",
-        intent: "capture",
-    };
+    // Hardcoding for guaranteed connection
+    const clientId = "AWwod6PO6_rdzONzxn4ftKHQyp9aiCseRnBBSFxvapkbkd9NXBiOM3T1WEnrS98kiZdgpYSVNxXsvQd4";
 
     return (
-        <PayPalScriptProvider options={initialOptions}>
+        <PayPalScriptProvider options={{
+            clientId: clientId,
+            currency: "USD",
+            intent: "CAPTURE",
+            "enable-funding": "card",
+            "disable-funding": "paylater"
+        }}>
             {children}
         </PayPalScriptProvider>
     );
