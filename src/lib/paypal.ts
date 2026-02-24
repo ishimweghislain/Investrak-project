@@ -42,18 +42,28 @@ export async function createOrder(amount: string) {
         },
         body: JSON.stringify({
             intent: "CAPTURE",
+            application_context: {
+                shipping_preference: "NO_SHIPPING",
+                user_action: "PAY_NOW",
+                brand_name: "Spark Holding Group",
+            },
             purchase_units: [
                 {
                     amount: {
                         currency_code: "USD",
                         value: amount,
                     },
+                    description: "Portfolio Investment Installment",
                 },
             ],
         }),
     });
 
-    return await response.json();
+    const data = await response.json();
+    if (!response.ok) {
+        console.error("PayPal Create Order Detail Error:", data);
+    }
+    return data;
 }
 
 export async function capturePayment(orderId: string) {
@@ -67,5 +77,10 @@ export async function capturePayment(orderId: string) {
         },
     });
 
-    return await response.json();
+    const data = await response.json();
+    if (!response.ok) {
+        console.error("PayPal Capture Detail Error:", data);
+    }
+    return data;
 }
+

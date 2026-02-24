@@ -39,11 +39,13 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
     };
 
     const onApprove = async (data: any) => {
+        const token = localStorage.getItem('token');
         try {
             const response = await fetch("/api/paypal/capture-order", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     orderID: data.orderID,
@@ -54,17 +56,20 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
             });
 
             const details = await response.json();
-            if (details.status === "COMPLETED") {
+            if (response.ok && details.status === "COMPLETED") {
                 toast.success("Payment successful!");
                 onSuccess();
             } else {
-                toast.error("Payment failed to capture");
+                const errorMessage = details.message || details.error || "Payment failed to capture";
+                toast.error(errorMessage);
+                console.error("Capture failure:", details);
             }
         } catch (error) {
             console.error(error);
             toast.error("Error capturing PayPal payment");
         }
     };
+
 
     return (
         <div className="w-full mt-4 space-y-3">
