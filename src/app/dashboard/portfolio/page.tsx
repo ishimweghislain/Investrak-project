@@ -5,6 +5,8 @@ import { Loader2, PieChart, ArrowUpRight, Wallet, ArrowLeft, RefreshCw, Smartpho
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import PayPalButton from '@/components/PayPalButton';
+
 
 export default function PortfolioPage() {
     const [loading, setLoading] = useState(true);
@@ -346,21 +348,44 @@ export default function PortfolioPage() {
                                             </div>
                                         </div>
 
-                                        <button
-                                            disabled={processing}
-                                            onClick={handlePayment}
-                                            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 text-white font-bold py-5 rounded-[20px] shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-3 text-lg"
-                                        >
-                                            {processing ? (
-                                                <Loader2 className="w-6 h-6 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <CheckCircle2 className="w-6 h-6" />
-                                                    Process Installment
-                                                </>
-                                            )}
-                                        </button>
-                                        <p className="text-[10px] text-center text-slate-400 font-medium">Locked for security • End-to-end encrypted • Mock simulation</p>
+                                        {paymentMethod === 'paypal' ? (
+                                            <div className="space-y-4">
+                                                {parseFloat(paymentAmount) > 0 ? (
+                                                    <PayPalButton
+                                                        amount={parseFloat(paymentAmount) || 0}
+                                                        investmentId={selectedInvestmentId}
+                                                        description={`Installment for ${stats?.investment?.title} via PayPal`}
+                                                        onSuccess={() => {
+                                                            setPaymentAmount('');
+                                                            setPaymentMethod('');
+                                                            fetchData();
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="p-4 bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/20 rounded-2xl text-center">
+                                                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Please enter an amount to continue with PayPal</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+
+                                            <button
+                                                disabled={processing}
+                                                onClick={handlePayment}
+                                                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 text-white font-bold py-5 rounded-[20px] shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-3 text-lg"
+                                            >
+                                                {processing ? (
+                                                    <Loader2 className="w-6 h-6 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <CheckCircle2 className="w-6 h-6" />
+                                                        Process Installment
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                        <p className="text-[10px] text-center text-slate-400 font-medium">Locked for security • End-to-end encrypted • {paymentMethod === 'paypal' ? 'Live Gateway' : 'Mock simulation'}</p>
+
                                     </div>
                                 </div>
                             </div>

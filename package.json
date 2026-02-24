@@ -17,6 +17,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^8.9.2",
     "@prisma/client": "^5.6.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
