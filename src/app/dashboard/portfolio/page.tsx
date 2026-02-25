@@ -1,12 +1,13 @@
 
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { Loader2, Wallet, ArrowLeft, RefreshCw, Smartphone, Send, CheckCircle2, TrendingUp, Users, Info } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import PayPalButton from '@/components/PayPalButton';
 import StripeButton from '@/components/StripeButton';
+import StripeReturnHandler from '@/components/StripeReturnHandler';
 
 
 export default function PortfolioPage() {
@@ -20,7 +21,6 @@ export default function PortfolioPage() {
     const [paymentAmount, setPaymentAmount] = useState('');
     const [processing, setProcessing] = useState(false);
     const router = useRouter();
-    const searchParams = useSearchParams();
 
     const fetchData = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -137,40 +137,8 @@ export default function PortfolioPage() {
         fetchData();
     }, [fetchData]);
 
-    // Handle Stripe return after payment
-    useEffect(() => {
-        const stripeStatus = searchParams.get('stripe_status');
-        const sessionId = searchParams.get('session_id');
 
-        if (stripeStatus === 'success' && sessionId) {
-            const pending = localStorage.getItem('stripe_pending');
-            if (pending) {
-                const { amountRwf, investmentId, description } = JSON.parse(pending);
-                const token = localStorage.getItem('token');
 
-                // Confirm payment server-side
-                fetch('/api/stripe/confirm-payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ sessionId, amountRwf, investmentId, description })
-                }).then(res => res.json()).then(data => {
-                    if (data.success) {
-                        toast.success('Stripe payment confirmed! 🎉');
-                        localStorage.removeItem('stripe_pending');
-                        fetchData();
-                    } else {
-                        toast.error(data.error || data.message || 'Could not confirm payment');
-                    }
-                }).catch(() => toast.error('Network error confirming payment'));
-            }
-            // Clean URL
-            router.replace('/dashboard/portfolio');
-        } else if (stripeStatus === 'cancel') {
-            toast('Payment cancelled.', { icon: '↩️' });
-            router.replace('/dashboard/portfolio');
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     const handlePayment = async () => {
         if (!selectedInvestmentId) {

@@ -18,6 +18,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });
         }
 
+        // ✅ IDEMPOTENCY CHECK — Prevent double recording
+        const existing = await prisma.transaction.findFirst({
+            where: {
+                description: { contains: sessionId },
+                userId: user.id,
+            }
+        });
+        if (existing) {
+            console.log(`Stripe session ${sessionId} already recorded. Skipping.`);
+            return NextResponse.json({ alreadyProcessed: true });
+        }
+
         // Verify stripe session is actually paid
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -37,13 +49,13 @@ export async function POST(request: NextRequest) {
 
         const amountNum = parseFloat(amountRwf.toString().replace(/,/g, ''));
 
-        // Record transaction in DB
+        // Record transaction in DB (include sessionId in description for idempotency lookup)
         await prisma.transaction.create({
             data: {
                 type: "PAYMENT",
                 amount: amountNum,
                 status: "COMPLETED",
-                description: description || `Stripe Payment (Session: ${sessionId})`,
+                description: `Stripe Payment (Session: ${sessionId})`,
                 userId: user.id,
                 investmentId: investmentId || null,
                 date: new Date(),

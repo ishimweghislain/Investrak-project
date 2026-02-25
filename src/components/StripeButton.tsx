@@ -14,9 +14,10 @@ interface StripeButtonProps {
 export default function StripeButton({ amount, investmentId, description, onSuccess }: StripeButtonProps) {
     const [loading, setLoading] = useState(false);
 
-    // Convert RWF to USD (1 USD ≈ 1300 RWF)
+    // Convert RWF to USD — 1 USD ≈ 1520 RWF (current market rate)
+    const RWF_TO_USD = 1520;
     const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
-    const usdAmount = (parseFloat(sanitizedAmount) / 1300).toFixed(2);
+    const usdAmount = (parseFloat(sanitizedAmount) / RWF_TO_USD).toFixed(2);
 
     const handleStripePayment = async () => {
         if (parseFloat(usdAmount) < 0.50) {

@@ -24,9 +24,9 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
         addLog("PayPalButton Mounted");
     }, []);
 
-    // Calculate USD (1 USD = 1300 RWF approx)
+    // Calculate USD (1 USD ≈ 1520 RWF — current market rate)
     const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
-    const usdAmount = (parseFloat(sanitizedAmount) / 1300).toFixed(2);
+    const usdAmount = (parseFloat(sanitizedAmount) / 1520).toFixed(2);
 
     const createOrder = async () => {
         try {
