@@ -34,6 +34,7 @@ export async function createOrder(amount: string, origin?: string) {
         intent: "CAPTURE",
         purchase_units: [
             {
+                reference_id: `txn_${Date.now()}`,
                 amount: {
                     currency_code: "USD",
                     value: formattedAmount,
@@ -43,7 +44,7 @@ export async function createOrder(amount: string, origin?: string) {
         ],
         application_context: {
             brand_name: "Investrak Spark Group",
-            landing_page: "NO_PREFERENCE",
+            landing_page: "BILLING",
             user_action: "PAY_NOW",
             shipping_preference: "NO_SHIPPING",
             return_url: `${siteUrl}/dashboard/portfolio?status=success`,
