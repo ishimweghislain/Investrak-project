@@ -1,6 +1,6 @@
-const PAYPAL_CLIENT_ID = "AWwod6PO6_rdzONzxn4ftKHQyp9aiCseRnBBSFxvapkbkd9NXBiOM3T1WEnrS98kiZdgpYSVNxXsvQd4";
-const PAYPAL_CLIENT_SECRET = "EMcS5JPhOCMcpmSu0xo1e8udMg0THxPXCoCrnyzHfg8eXxJqWOih2F8QRM2y6XPqvRb45hc5yn0GjdK5";
-const base = "https://api-m.sandbox.paypal.com";
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || "AWwod6PO6_rdzONzxn4ftKHQyp9aiCseRnBBSFxvapkbkd9NXBiOM3T1WEnrS98kiZdgpYSVNxXsvQd4";
+const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || "EMcS5JPhOCMcpmSu0xo1e8udMg0THxPXCoCrnyzHfg8eXxJqWOih2F8QRM2y6XPqvRb45hc5yn0GjdK5";
+const base = process.env.PAYPAL_BASE_URL || "https://api-m.sandbox.paypal.com";
 
 export async function generateAccessToken() {
     const auth = Buffer.from(PAYPAL_CLIENT_ID + ":" + PAYPAL_CLIENT_SECRET).toString("base64");
