@@ -1,11 +1,12 @@
 
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, PieChart, ArrowUpRight, Wallet, ArrowLeft, RefreshCw, Smartphone, CreditCard, Landmark, Send, CheckCircle2, TrendingUp, Users, Info } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Loader2, Wallet, ArrowLeft, RefreshCw, Smartphone, Send, CheckCircle2, TrendingUp, Users, Info } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import PayPalButton from '@/components/PayPalButton';
+import StripeButton from '@/components/StripeButton';
 
 
 export default function PortfolioPage() {
@@ -19,6 +20,7 @@ export default function PortfolioPage() {
     const [paymentAmount, setPaymentAmount] = useState('');
     const [processing, setProcessing] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const fetchData = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -134,6 +136,41 @@ export default function PortfolioPage() {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    // Handle Stripe return after payment
+    useEffect(() => {
+        const stripeStatus = searchParams.get('stripe_status');
+        const sessionId = searchParams.get('session_id');
+
+        if (stripeStatus === 'success' && sessionId) {
+            const pending = localStorage.getItem('stripe_pending');
+            if (pending) {
+                const { amountRwf, investmentId, description } = JSON.parse(pending);
+                const token = localStorage.getItem('token');
+
+                // Confirm payment server-side
+                fetch('/api/stripe/confirm-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ sessionId, amountRwf, investmentId, description })
+                }).then(res => res.json()).then(data => {
+                    if (data.success) {
+                        toast.success('Stripe payment confirmed! 🎉');
+                        localStorage.removeItem('stripe_pending');
+                        fetchData();
+                    } else {
+                        toast.error(data.error || data.message || 'Could not confirm payment');
+                    }
+                }).catch(() => toast.error('Network error confirming payment'));
+            }
+            // Clean URL
+            router.replace('/dashboard/portfolio');
+        } else if (stripeStatus === 'cancel') {
+            toast('Payment cancelled.', { icon: '↩️' });
+            router.replace('/dashboard/portfolio');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handlePayment = async () => {
         if (!selectedInvestmentId) {
@@ -309,6 +346,7 @@ export default function PortfolioPage() {
                                             {[
                                                 { id: 'momo', name: 'MoMo', icon: Smartphone, color: 'hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-500/10' },
                                                 { id: 'paypal', name: 'PayPal', icon: Send, color: 'hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10' },
+                                                { id: 'stripe', name: 'Stripe', icon: CheckCircle2, color: 'hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-500/10' },
                                             ].map((method) => (
                                                 <button
                                                     key={method.id}
@@ -346,22 +384,35 @@ export default function PortfolioPage() {
                                             </div>
                                         </div>
 
-                                        {paymentMethod === 'paypal' ? (
+                                        {(paymentMethod === 'paypal' || paymentMethod === 'stripe') ? (
                                             <div className="space-y-4">
                                                 {parseFloat(paymentAmount) > 0 ? (
-                                                    <PayPalButton
-                                                        amount={parseFloat(paymentAmount) || 0}
-                                                        investmentId={selectedInvestmentId}
-                                                        description={`Installment for ${stats?.investment?.title} via PayPal`}
-                                                        onSuccess={() => {
-                                                            setPaymentAmount('');
-                                                            setPaymentMethod('');
-                                                            fetchData();
-                                                        }}
-                                                    />
+                                                    paymentMethod === 'paypal' ? (
+                                                        <PayPalButton
+                                                            amount={parseFloat(paymentAmount) || 0}
+                                                            investmentId={selectedInvestmentId}
+                                                            description={`Installment for ${stats?.investment?.title} via PayPal`}
+                                                            onSuccess={() => {
+                                                                setPaymentAmount('');
+                                                                setPaymentMethod('');
+                                                                fetchData();
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <StripeButton
+                                                            amount={parseFloat(paymentAmount) || 0}
+                                                            investmentId={selectedInvestmentId}
+                                                            description={`Installment for ${stats?.investment?.title} via Stripe`}
+                                                            onSuccess={() => {
+                                                                setPaymentAmount('');
+                                                                setPaymentMethod('');
+                                                                fetchData();
+                                                            }}
+                                                        />
+                                                    )
                                                 ) : (
-                                                    <div className="p-4 bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/20 rounded-2xl text-center">
-                                                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Please enter an amount to continue with PayPal</p>
+                                                    <div className="p-4 bg-violet-50 dark:bg-violet-500/5 border border-violet-200 dark:border-violet-500/20 rounded-2xl text-center">
+                                                        <p className="text-sm font-medium text-violet-600 dark:text-violet-400">Please enter an amount to continue with {paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'}</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -382,7 +433,7 @@ export default function PortfolioPage() {
                                                 )}
                                             </button>
                                         )}
-                                        <p className="text-[10px] text-center text-slate-400 font-medium">Locked for security • End-to-end encrypted • {paymentMethod === 'paypal' ? 'Live Gateway' : 'Mock simulation'}</p>
+                                        <p className="text-[10px] text-center text-slate-400 font-medium">Locked for security • End-to-end encrypted • {paymentMethod === 'paypal' ? 'PayPal Gateway' : paymentMethod === 'stripe' ? 'Stripe Gateway' : 'Mock simulation'}</p>
 
                                     </div>
                                 </div>
