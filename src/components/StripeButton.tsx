@@ -96,7 +96,7 @@ export default function StripeButton({ amount, investmentId, description, onSucc
             </div>
 
             <p className="text-[10px] text-slate-400 font-medium text-center italic">
-                You will be redirected to Stripe's secure checkout page.
+                You will be redirected to Stripe&apos;s secure checkout page.
             </p>
         </div>
     );

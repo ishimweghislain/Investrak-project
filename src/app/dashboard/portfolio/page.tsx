@@ -198,6 +198,11 @@ export default function PortfolioPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-white p-4 md:p-8 pb-32 transition-colors">
+            {/* Handle Stripe Redirect Returns safely with Suspense */}
+            <Suspense fallback={null}>
+                <StripeReturnHandler onSuccess={fetchData} />
+            </Suspense>
+
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

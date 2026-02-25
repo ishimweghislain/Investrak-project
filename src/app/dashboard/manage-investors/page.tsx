@@ -60,7 +60,7 @@ export default function ManageInvestors() {
             const active = userInvestments.find(i => i.status === 'ACTIVE') || userInvestments[0];
             setPaymentRecordForm(prev => ({ ...prev, investmentId: active.id }));
         }
-    }, [userInvestments]);
+    }, [userInvestments, paymentRecordForm.investmentId]);
 
     useEffect(() => {
         fetchInvestors();
