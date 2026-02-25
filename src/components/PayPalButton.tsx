@@ -30,11 +30,18 @@ export default function PayPalButton({ amount, investmentId, description, onSucc
 
     const createOrder = async () => {
         try {
+            if (parseFloat(usdAmount) < 0.01) {
+                throw new Error("Amount is too small for PayPal (min $0.01 USD)");
+            }
+
             addLog(`Order: Sending $${usdAmount} to API...`);
             const response = await fetch("/api/paypal/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: usdAmount }),
+                body: JSON.stringify({
+                    amount: usdAmount,
+                    origin: window.location.origin
+                }),
             });
 
             const order = await response.json();

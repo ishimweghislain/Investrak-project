@@ -5,10 +5,10 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
     try {
-        const { amount } = await request.json();
-        console.log(`Creating PayPal order for: $${amount} USD`);
+        const { amount, origin } = await request.json();
+        console.log(`Creating PayPal order for: $${amount} USD from ${origin}`);
 
-        const order = await createOrder(amount);
+        const order = await createOrder(amount, origin);
 
         if (order.error || order.message) {
             console.error("PayPal API Error:", order);

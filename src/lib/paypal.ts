@@ -22,10 +22,13 @@ export async function generateAccessToken() {
     return data.access_token;
 }
 
-export async function createOrder(amount: string) {
+export async function createOrder(amount: string, origin?: string) {
     const accessToken = await generateAccessToken();
     const url = `${base}/v2/checkout/orders`;
     const formattedAmount = parseFloat(amount).toFixed(2);
+
+    // Ensure we have a valid absolute URL for returns
+    const siteUrl = origin || process.env.NEXT_PUBLIC_APP_URL || "https://example.com";
 
     const body = JSON.stringify({
         intent: "CAPTURE",
@@ -35,12 +38,16 @@ export async function createOrder(amount: string) {
                     currency_code: "USD",
                     value: formattedAmount,
                 },
-                description: "Portfolio Investment"
+                description: "Portfolio Investment Installment"
             }
         ],
         application_context: {
+            brand_name: "Investrak Spark Group",
+            landing_page: "NO_PREFERENCE",
+            user_action: "PAY_NOW",
             shipping_preference: "NO_SHIPPING",
-            user_action: "PAY_NOW"
+            return_url: `${siteUrl}/dashboard/portfolio?status=success`,
+            cancel_url: `${siteUrl}/dashboard/portfolio?status=cancel`
         }
     });
 
@@ -49,7 +56,7 @@ export async function createOrder(amount: string) {
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
-            "PayPal-Request-Id": Date.now().toString()
+            "PayPal-Request-Id": `order_${Date.now()}`
         },
         body: body,
     });

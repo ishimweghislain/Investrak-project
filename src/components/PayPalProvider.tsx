@@ -9,7 +9,10 @@ export default function PayPalProvider({ children }: { children: React.ReactNode
     return (
         <PayPalScriptProvider options={{
             clientId: clientId,
-            currency: "USD"
+            currency: "USD",
+            intent: "capture",
+            "enable-funding": "card", // Enable optional funding sources for testing
+            "disable-funding": "paylater", // Disable clutter
         }}>
             {children}
         </PayPalScriptProvider>
