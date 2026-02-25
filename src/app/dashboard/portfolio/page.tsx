@@ -309,8 +309,6 @@ export default function PortfolioPage() {
                                             {[
                                                 { id: 'momo', name: 'MoMo', icon: Smartphone, color: 'hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-500/10' },
                                                 { id: 'paypal', name: 'PayPal', icon: Send, color: 'hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10' },
-                                                { id: 'card', name: 'Credit Card', icon: CreditCard, color: 'hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-500/10' },
-                                                { id: 'bank', name: 'Bank Trans', icon: Landmark, color: 'hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' }
                                             ].map((method) => (
                                                 <button
                                                     key={method.id}
