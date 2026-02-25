@@ -14,14 +14,13 @@ interface StripeButtonProps {
 export default function StripeButton({ amount, investmentId, description, onSuccess }: StripeButtonProps) {
     const [loading, setLoading] = useState(false);
 
-    // Convert RWF to USD — 1 USD ≈ 1520 RWF (current market rate)
-    const RWF_TO_USD = 1520;
     const sanitizedAmount = amount.toString().replace(/,/g, '').trim();
-    const usdAmount = (parseFloat(sanitizedAmount) / RWF_TO_USD).toFixed(2);
 
     const handleStripePayment = async () => {
-        if (parseFloat(usdAmount) < 0.50) {
-            toast.error(`Amount too small. Minimum is ~RWF 650 (USD $0.50). You entered $${usdAmount}.`);
+        const amountRwf = parseFloat(sanitizedAmount);
+
+        if (amountRwf < 500) { // Practical minimum for RWF in Stripe (~$0.50 equivalent)
+            toast.error(`Amount too small. Minimum is RWF 500.`);
             return;
         }
 
@@ -31,7 +30,7 @@ export default function StripeButton({ amount, investmentId, description, onSucc
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    amount: usdAmount,
+                    amount: amountRwf, // Sending raw RWF now
                     description: description,
                     investmentId: investmentId,
                     origin: window.location.origin,
@@ -62,15 +61,6 @@ export default function StripeButton({ amount, investmentId, description, onSucc
 
     return (
         <div className="w-full mt-4 space-y-3">
-            <div className="flex items-center justify-between px-1">
-                <span className="flex items-center gap-1.5 text-[10px] font-bold text-violet-500 uppercase tracking-widest bg-violet-500/10 px-2 py-1 rounded-md">
-                    Stripe Test Mode
-                </span>
-                <span className="text-[10px] font-bold text-slate-500">
-                    {usdAmount} USD
-                </span>
-            </div>
-
             <button
                 onClick={handleStripePayment}
                 disabled={loading}
@@ -79,21 +69,15 @@ export default function StripeButton({ amount, investmentId, description, onSucc
                 {loading ? (
                     <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        Redirecting to Stripe...
+                        Connecting to Secure Payment Port...
                     </>
                 ) : (
                     <>
                         <CreditCard className="w-5 h-5" />
-                        Pay with Stripe
+                        Pay Securely with Stripe
                     </>
                 )}
             </button>
-
-            <div className="p-3 bg-violet-500/5 border border-violet-500/10 rounded-xl">
-                <p className="text-[10px] font-bold text-violet-400 uppercase tracking-widest mb-1">Test Card Details</p>
-                <p className="text-[10px] font-mono text-slate-500">Card: <span className="text-slate-300">4242 4242 4242 4242</span></p>
-                <p className="text-[10px] font-mono text-slate-500">Expiry: <span className="text-slate-300">Any future date</span> · CVC: <span className="text-slate-300">Any 3 digits</span></p>
-            </div>
 
             <p className="text-[10px] text-slate-400 font-medium text-center italic">
                 You will be redirected to Stripe&apos;s secure checkout page.
