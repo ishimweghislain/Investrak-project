@@ -11,8 +11,7 @@ export default function PayPalProvider({ children }: { children: React.ReactNode
             clientId: clientId,
             currency: "USD",
             intent: "capture",
-            "enable-funding": "card", // Enable optional funding sources for testing
-            "disable-funding": "paylater", // Disable clutter
+            "disable-funding": "card,credit,paylater,venmo",
         }}>
             {children}
         </PayPalScriptProvider>
